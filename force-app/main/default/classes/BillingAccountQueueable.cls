@@ -111,6 +111,7 @@ global class BillingAccountQueueable implements Queueable, Database.AllowsCallou
         List<Billing_Account__c> failedRecords = new List<Billing_Account__c>();
         try {
             Database.UpsertResult[] results = Database.upsert(records, Billing_Account__c.fields.Billing_Account_Unique_Key__c, false);
+            system.debug('results: ' + results.size());
             for (Integer i = 0; i < results.size(); i++) {
                 if (!results[i].isSuccess()) {
                     failedRecords.add(records[i]);
