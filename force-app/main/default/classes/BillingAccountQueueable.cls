@@ -109,23 +109,39 @@ global class BillingAccountQueueable implements Queueable, Database.AllowsCallou
     
     private void upsertRecords(List<Billing_Account__c> records) {
         List<Billing_Account__c> failedRecords = new List<Billing_Account__c>();
+        StringBuilder errorDetails = new StringBuilder();
+    
         try {
             Database.UpsertResult[] results = Database.upsert(records, Billing_Account__c.fields.Billing_Account_Unique_Key__c, false);
-            system.debug('results: ' + results.size());
             for (Integer i = 0; i < results.size(); i++) {
                 if (!results[i].isSuccess()) {
                     failedRecords.add(records[i]);
+                    
+                    // Append detailed errors to the string builder
+                    for (Database.Error error : results[i].getErrors()) {
+                        errorDetails.append('Record ID: ').append(records[i].Id).append(' - ');
+                        errorDetails.append('Error Message: ').append(error.getMessage()).append('. ');
+                        errorDetails.append('Status Code: ').append(error.getStatusCode()).append('. ');
+                        
+                        if (error.getFields() != null && !error.getFields().isEmpty()) {
+                            errorDetails.append('Fields: ').append(String.join(error.getFields(), ', ')).append('. ');
+                        }
+                        errorDetails.append('\n'); // Separate each error for readability
+                    }
                 }
             }
         } catch (Exception ex) {
-            createLog('DML Exception', ex.getMessage(), 'Inbound', JSON.serialize(records));
+            // Log unexpected exceptions
+            createLog('DML Exception', ex.getMessage(), 'Inbound', JSON.serialize(records), ex);
             return;
         }
         
         if (!failedRecords.isEmpty()) {
-            createLog('DML Failure', 'One or more records failed during upsert operation.', 'Inbound', JSON.serialize(failedRecords));
+            // Log all detailed errors
+            createLog('DML Failure', errorDetails.toString(), 'Inbound', JSON.serialize(failedRecords), null);
         }
     }
+    
     
     private void createLog(String errorType, String errorMessage, String direction, String jsonData) {
         String truncatedJson = jsonData;
