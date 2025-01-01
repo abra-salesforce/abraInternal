@@ -1,12 +1,18 @@
-global class BillingAccountQueueable implements Queueable, Database.AllowsCallouts {
+global class BillingAccountBatch implements Database.Batchable<SObject>, Database.AllowsCallouts {
+    
     // Endpoint URL
     private static final String ENDPOINT = 'https://abra-psaapi-test.azurewebsites.net/api/SalesForceInterface/GetCustomers?companyName=ITmyway';
-
-    global void execute(QueueableContext context) {
+    
+    global Database.QueryLocator start(Database.BatchableContext BC) {
+        System.debug('Starting batch process...');
+        // Use CMDT or relevant query to get mappings or required configurations
+        return Database.getQueryLocator([SELECT Nav_Field_API__c, SF_Field_API__c, Field_Type__c FROM Nav_Fields_Mapping__mdt]);
+    }
+    
+    global void execute(Database.BatchableContext BC, List<SObject> scope) {
         try {
-            System.debug('Starting queueable process...');
+            System.debug('Executing batch with scope size: ' + scope.size());
             String ApiKey = 'ITMy8e791488-1a13-4f48-a96a-adaa9c523135Way=';
-
             // Call the API
             HttpRequest request = new HttpRequest();
             request.setEndpoint(ENDPOINT);
@@ -15,25 +21,30 @@ global class BillingAccountQueueable implements Queueable, Database.AllowsCallou
             request.setHeader('ApiKey', ApiKey);
             request.setHeader('Content-Type', 'application/json');
             request.setHeader('Accept', 'application/json');
-
             HttpResponse response = new Http().send(request);
+            
             System.debug('API response status code: ' + response.getStatusCode());
-
+            
             if (response.getStatusCode() == 200) {
                 List<Object> result = (List<Object>) JSON.deserializeUntyped(response.getBody());
                 System.debug('Number of records received from API: ' + result.size());
-
+                
                 processResponseDataInBatches(result);
             } else {
                 System.debug('API call failed with status code: ' + response.getStatusCode());
             }
         } catch (Exception ex) {
-            System.debug('Unexpected error in execute: ' + ex.getMessage());
+            System.debug('Unexpected Error in execute: ' + ex.getMessage());
         }
     }
-
+    
+    global void finish(Database.BatchableContext BC) {
+        System.debug('Batch processing completed.');
+    }
+    
     private void processResponseDataInBatches(List<Object> result) {
         System.debug('Processing response data in batches...');
+        List<Map<String, Object>> batchData = new List<Map<String, Object>>();
         List<Billing_Account__c> recordsToUpsert = new List<Billing_Account__c>();
 
         Map<String, Map<String, String>> fieldMappings = new Map<String, Map<String, String>>();
@@ -114,6 +125,7 @@ global class BillingAccountQueueable implements Queueable, Database.AllowsCallou
                 if (results[i].isSuccess()) {
                     System.debug('Successfully upserted record: ' + records[i]);
                 } else {
+                    // Extracting specific fields to avoid log truncation
                     String failedRecordDetails = 'Account__c=' + records[i].Account__c + 
                                                  ', Name=' + records[i].Name + 
                                                  ', Billing_Account_Unique_Key__c=' + records[i].Billing_Account_Unique_Key__c;

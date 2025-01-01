@@ -73,7 +73,7 @@ public with sharing class AsyncNavIntegrationQueueable implements Queueable, Dat
         req.setHeader('ApiKey', sett.Api_Key__c);
         req.setHeader('Content-Type', 'application/json');
         req.setHeader('Accept', 'application/json');
-        req.setEndpoint(sett.Endpoint__c+'/BulkInsertTimesheet/ITmyway');
+        req.setEndpoint(sett.Endpoint__c+'v1/BulkInsertTimesheet/ITmyway');
         // setting body
         System.debug('Input Request:' + body);
         req.setBody(body);
