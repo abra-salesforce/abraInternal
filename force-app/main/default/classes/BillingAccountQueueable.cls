@@ -1,21 +1,19 @@
 global class BillingAccountQueueable implements Queueable, Database.AllowsCallouts {
-    private List<Object> apiResponse; // Holds the API response
-    private Integer startIndex; // Tracks the starting index of the batch
-
-    // Constructor to pass API response and starting index for the batch
+    private List<Object> apiResponse;
+    private Integer startIndex;
+    
     public BillingAccountQueueable() {
         this.apiResponse = new List<Object>();
         this.startIndex = 0;
     }
-
+    
     public BillingAccountQueueable(List<Object> apiResponse, Integer startIndex) {
         this.apiResponse = apiResponse;
         this.startIndex = startIndex;
     }
-
+    
     global void execute(QueueableContext context) {
         try {
-            // If this is the first execution, fetch the API response
             if (apiResponse.isEmpty()) {
                 Nav_Setting__mdt settings = getSettings();
                 apiResponse = callApi(settings);
@@ -24,80 +22,66 @@ global class BillingAccountQueueable implements Queueable, Database.AllowsCallou
                     return;
                 }
             }
-
-            // Process the current batch
+            
             Integer chunkSize = 200;
             Integer endIndex = Math.min(startIndex + chunkSize, apiResponse.size());
             System.debug('Processing records from index ' + startIndex + ' to ' + (endIndex - 1));
-
+            
             List<Billing_Account__c> recordsToUpsert = new List<Billing_Account__c>();
             List<Map<String, Object>> invalidRows = new List<Map<String, Object>>();
-
-            // Retrieve field mappings
             Map<String, Map<String, String>> fieldMappings = getFieldMappings();
-
+            
             for (Integer i = startIndex; i < endIndex; i++) {
                 Map<String, Object> data = (Map<String, Object>) apiResponse[i];
                 try {
                     String crmId = (String) data.get('CRMID');
                     if (String.isEmpty(crmId) || !crmId.startsWith('001') || crmId.length() != 18) {
-                        System.debug('Skipping record due to invalid CRMID: ' + data);
-                        invalidRows.add(data); // Add invalid row to the list
+                        invalidRows.add(data);
                         continue;
                     }
-
+                    
                     Billing_Account__c record = new Billing_Account__c();
                     for (String navField : fieldMappings.keySet()) {
                         if (data.containsKey(navField)) {
                             Map<String, String> mapping = fieldMappings.get(navField);
                             String fieldType = mapping.get('Field_Type__c');
                             Object value = data.get(navField);
-
+                            
                             if (fieldType == 'Date' && value != null) {
-                                String dateString = (String) value;
-                                record.put(mapping.get('SF_Field_API__c'), Date.valueOf(dateString.substring(0, 10)));
+                                record.put(mapping.get('SF_Field_API__c'), Date.valueOf(((String) value).substring(0, 10)));
                             } else if (value != null) {
                                 record.put(mapping.get('SF_Field_API__c'), value);
                             }
                         }
                     }
-
+                    
                     record.Account__c = crmId;
                     if (data.containsKey('ViewKey')) {
                         record.Billing_Account_Unique_Key__c = (String) data.get('ViewKey');
                     }
-
+                    
                     recordsToUpsert.add(record);
                 } catch (Exception ex) {
-                    System.debug('Error processing record: ' + ex.getMessage());
-                    invalidRows.add(data); // Add invalid row to the list
+                    invalidRows.add(data);
                 }
             }
-
-            // Create a log if there are invalid rows
+            
             if (!invalidRows.isEmpty()) {
                 createLog('Invalid Data in API Response', '', 'Outbound', JSON.serialize(invalidRows));
             }
-
-            // Upsert the current batch
+            
             if (!recordsToUpsert.isEmpty()) {
-                try {
-                    upsertRecords(recordsToUpsert);
-                } catch (Exception ex) {
-                    createLog('DML Failure', ex.getMessage(), 'Outbound', JSON.serialize(recordsToUpsert));
-                }
+                upsertRecords(recordsToUpsert);
             }
-
-            // Enqueue the next batch if there are more records
+            
             if (endIndex < apiResponse.size() && !Test.isRunningTest()) {
-                System.debug('Enqueuing next batch starting at index ' + endIndex);
                 System.enqueueJob(new BillingAccountQueueable(apiResponse, endIndex));
             }
         } catch (Exception ex) {
             System.debug('Unexpected error: ' + ex.getMessage());
         }
     }
-
+    
     private List<Object> callApi(Nav_Setting__mdt settings) {
         try {
             HttpRequest request = new HttpRequest();
@@ -107,10 +91,8 @@ global class BillingAccountQueueable implements Queueable, Database.AllowsCallou
             request.setHeader('ApiKey', settings.Api_Key__c);
             request.setHeader('Content-Type', 'application/json');
             request.setHeader('Accept', 'application/json');
-
+            
             HttpResponse response = new Http().send(request);
-            System.debug('API response status code: ' + response.getStatusCode());
-
             if (response.getStatusCode() == 200) {
                 return (List<Object>) JSON.deserializeUntyped(response.getBody());
             } else {
@@ -121,16 +103,26 @@ global class BillingAccountQueueable implements Queueable, Database.AllowsCallou
         }
         return new List<Object>();
     }
-
+    
     private void upsertRecords(List<Billing_Account__c> records) {
-        Database.UpsertResult[] results = Database.upsert(records, Billing_Account__c.fields.Billing_Account_Unique_Key__c, false);
-        for (Database.UpsertResult result : results) {
-            if (!result.isSuccess()) {
-                createLog('DML Failure', result.getErrors()[0].getMessage(), 'Outbound', JSON.serialize(records));
+        List<Billing_Account__c> failedRecords = new List<Billing_Account__c>();
+        try {
+            Database.UpsertResult[] results = Database.upsert(records, Billing_Account__c.fields.Billing_Account_Unique_Key__c, false);
+            for (Integer i = 0; i < results.size(); i++) {
+                if (!results[i].isSuccess()) {
+                    failedRecords.add(records[i]);
+                }
             }
+        } catch (Exception ex) {
+            createLog('DML Exception', ex.getMessage(), 'Outbound', JSON.serialize(records));
+            return;
+        }
+        
+        if (!failedRecords.isEmpty()) {
+            createLog('DML Failure', 'One or more records failed during upsert operation.', 'Outbound', JSON.serialize(failedRecords));
         }
     }
-
+    
     private void createLog(String errorType, String errorMessage, String direction, String jsonData) {
         Log__c log = new Log__c();
         log.Error__c = errorType + ': ' + errorMessage;
@@ -138,7 +130,7 @@ global class BillingAccountQueueable implements Queueable, Database.AllowsCallou
         log.Json__c = jsonData;
         insert log;
     }
-
+    
     private Map<String, Map<String, String>> getFieldMappings() {
         Map<String, Map<String, String>> fieldMappings = new Map<String, Map<String, String>>();
         for (Nav_Fields_Mapping__mdt mapping : [SELECT Nav_Field_API__c, SF_Field_API__c, Field_Type__c FROM Nav_Fields_Mapping__mdt]) {
@@ -149,7 +141,7 @@ global class BillingAccountQueueable implements Queueable, Database.AllowsCallou
         }
         return fieldMappings;
     }
-
+    
     public static Nav_Setting__mdt getSettings() {
         String org = ([SELECT IsSandbox FROM Organization LIMIT 1].IsSandbox) ? 'Sandbox' : 'Production';
         return [SELECT Id, Endpoint__c, Api_Key__c FROM Nav_Setting__mdt WHERE DeveloperName = :org LIMIT 1];
