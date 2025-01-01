@@ -117,7 +117,7 @@ global class BillingAccountQueueable implements Queueable, Database.AllowsCallou
                 }
             }
         } catch (Exception ex) {
-            // createLog('DML Exception', ex.getMessage(), 'Inbound', JSON.serialize(records));
+            createLog('DML Exception', ex.getMessage(), 'Inbound', JSON.serialize(records));
             return;
         }
         
