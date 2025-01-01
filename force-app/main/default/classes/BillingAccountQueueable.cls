@@ -22,7 +22,7 @@ global class BillingAccountQueueable implements Queueable, Database.AllowsCallou
                 fieldMappings = getFieldMappings();
                 apiResponse = callApi(settings);
                 if (apiResponse.isEmpty()) {
-                    createLog('API response is empty', 'No data retrieved from API.', 'inbound', null);
+                    createLog('API response is empty', 'No data retrieved from API.', 'Inbound', null);
                     return;
                 }
             }
@@ -57,6 +57,7 @@ global class BillingAccountQueueable implements Queueable, Database.AllowsCallou
                         }
                     }
                     
+                    record.LastSyncTime__c = Datetime.now();
                     /*record.Account__c = crmId;
                     if (data.containsKey('ViewKey')) {
                         record.Billing_Account_Unique_Key__c = (String) data.get('ViewKey');
