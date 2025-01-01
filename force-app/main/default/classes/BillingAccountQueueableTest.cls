@@ -77,6 +77,18 @@ public class BillingAccountQueueableTest {
             }
             // System.assert(foundInvalidRowsLog, 'Log for invalid rows should be created');
         }
+
+        @IsTest
+        static void testLamesauApiScheduler() {
+            Test.startTest();
+            
+            String jobId = System.schedule('BillingAccountScheduledJob', '0 0 12 * * ?', new BillingAccountScheduler());
+            
+            CronTrigger ct = [SELECT Id, CronExpression, TimesTriggered FROM CronTrigger WHERE Id = :jobId];
+            
+            Test.stopTest();
+        }
+        
         
         @isTest
         static void testEnqueueNextJob() {
