@@ -109,36 +109,31 @@ global class BillingAccountQueueable implements Queueable, Database.AllowsCallou
     
     private void upsertRecords(List<Billing_Account__c> records) {
         List<Billing_Account__c> failedRecords = new List<Billing_Account__c>();
-        StringBuilder errorDetails = new StringBuilder();
+        String errorDetails = ''; // Initialize as an empty string
     
         try {
             Database.UpsertResult[] results = Database.upsert(records, Billing_Account__c.fields.Billing_Account_Unique_Key__c, false);
             for (Integer i = 0; i < results.size(); i++) {
                 if (!results[i].isSuccess()) {
                     failedRecords.add(records[i]);
-                    
-                    // Append detailed errors to the string builder
                     for (Database.Error error : results[i].getErrors()) {
-                        errorDetails.append('Record ID: ').append(records[i].Id).append(' - ');
-                        errorDetails.append('Error Message: ').append(error.getMessage()).append('. ');
-                        errorDetails.append('Status Code: ').append(error.getStatusCode()).append('. ');
-                        
+                        errorDetails += 'Record ID: ' + (records[i].Id != null ? records[i].Id : 'N/A') + ' - ';
+                        errorDetails += 'Error Message: ' + error.getMessage() + '. ';
+                        errorDetails += 'Status Code: ' + error.getStatusCode() + '. ';
                         if (error.getFields() != null && !error.getFields().isEmpty()) {
-                            errorDetails.append('Fields: ').append(String.join(error.getFields(), ', ')).append('. ');
+                            errorDetails += 'Fields: ' + String.join(error.getFields(), ', ') + '. ';
                         }
-                        errorDetails.append('\n'); // Separate each error for readability
+                        errorDetails += '\n';
                     }
                 }
             }
         } catch (Exception ex) {
-            // Log unexpected exceptions
-            createLog('DML Exception', ex.getMessage(), 'Inbound', JSON.serialize(records), ex);
+            createLog('DML Exception', ex.getMessage(), 'Inbound', JSON.serialize(records));
             return;
         }
         
         if (!failedRecords.isEmpty()) {
-            // Log all detailed errors
-            createLog('DML Failure', errorDetails.toString(), 'Inbound', JSON.serialize(failedRecords), null);
+            createLog('DML Failure', errorDetails, 'Inbound', JSON.serialize(failedRecords));
         }
     }
     
