@@ -22,7 +22,7 @@ global class BillingAccountQueueable implements Queueable, Database.AllowsCallou
                 fieldMappings = getFieldMappings();
                 apiResponse = callApi(settings);
                 if (apiResponse.isEmpty()) {
-                    createLog('API response is empty', 'No data retrieved from API.', 'Outbound', null);
+                    createLog('API response is empty', 'No data retrieved from API.', 'inbound', null);
                     return;
                 }
             }
@@ -69,7 +69,7 @@ global class BillingAccountQueueable implements Queueable, Database.AllowsCallou
             }
             
             if (!invalidRows.isEmpty()) {
-                createLog('Invalid Data in API Response', '', 'Outbound', JSON.serialize(invalidRows));
+                createLog('Invalid Data in API Response', '', 'Inbound', JSON.serialize(invalidRows));
             }
             
             if (!recordsToUpsert.isEmpty()) {
@@ -98,10 +98,10 @@ global class BillingAccountQueueable implements Queueable, Database.AllowsCallou
             if (response.getStatusCode() == 200) {
                 return (List<Object>) JSON.deserializeUntyped(response.getBody());
             } else {
-                createLog('API Call Failure', 'API call failed with status code: ' + response.getStatusCode(), 'Outbound', response.getBody());
+                createLog('API Call Failure', 'API call failed with status code: ' + response.getStatusCode(), 'Inbound', response.getBody());
             }
         } catch (Exception ex) {
-            createLog('API Call Exception', ex.getMessage(), 'Outbound', null);
+            createLog('API Call Exception', ex.getMessage(), 'Inbound', null);
         }
         return new List<Object>();
     }
@@ -116,12 +116,12 @@ global class BillingAccountQueueable implements Queueable, Database.AllowsCallou
                 }
             }
         } catch (Exception ex) {
-            createLog('DML Exception', ex.getMessage(), 'Outbound', JSON.serialize(records));
+            createLog('DML Exception', ex.getMessage(), 'Inbound', JSON.serialize(records));
             return;
         }
         
         if (!failedRecords.isEmpty()) {
-            createLog('DML Failure', 'One or more records failed during upsert operation.', 'Outbound', JSON.serialize(failedRecords));
+            createLog('DML Failure', 'One or more records failed during upsert operation.', 'Inbound', JSON.serialize(failedRecords));
         }
     }
     
