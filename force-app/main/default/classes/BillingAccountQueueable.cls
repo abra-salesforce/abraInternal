@@ -1,5 +1,7 @@
 global class BillingAccountQueueable implements Queueable, Database.AllowsCallouts {
+    private static final Integer chunkSize = 200;
     private List<Object> apiResponse;
+    private Map<String, Map<String, String>> fieldMappings;
     private Integer startIndex;
     
     public BillingAccountQueueable() {
@@ -7,15 +9,17 @@ global class BillingAccountQueueable implements Queueable, Database.AllowsCallou
         this.startIndex = 0;
     }
     
-    public BillingAccountQueueable(List<Object> apiResponse, Integer startIndex) {
+    public BillingAccountQueueable(List<Object> apiResponse, Integer startIndex, Map<String, Map<String, String>> fieldMappings) {
         this.apiResponse = apiResponse;
         this.startIndex = startIndex;
+        this.fieldMappings = fieldMappings;
     }
     
     global void execute(QueueableContext context) {
         try {
             if (apiResponse.isEmpty()) {
                 Nav_Setting__mdt settings = getSettings();
+                fieldMappings = getFieldMappings();
                 apiResponse = callApi(settings);
                 if (apiResponse.isEmpty()) {
                     createLog('API response is empty', 'No data retrieved from API.', 'Outbound', null);
@@ -23,13 +27,11 @@ global class BillingAccountQueueable implements Queueable, Database.AllowsCallou
                 }
             }
             
-            Integer chunkSize = 200;
             Integer endIndex = Math.min(startIndex + chunkSize, apiResponse.size());
             System.debug('Processing records from index ' + startIndex + ' to ' + (endIndex - 1));
             
             List<Billing_Account__c> recordsToUpsert = new List<Billing_Account__c>();
             List<Map<String, Object>> invalidRows = new List<Map<String, Object>>();
-            Map<String, Map<String, String>> fieldMappings = getFieldMappings();
             
             for (Integer i = startIndex; i < endIndex; i++) {
                 Map<String, Object> data = (Map<String, Object>) apiResponse[i];
@@ -55,10 +57,10 @@ global class BillingAccountQueueable implements Queueable, Database.AllowsCallou
                         }
                     }
                     
-                    record.Account__c = crmId;
+                    /*record.Account__c = crmId;
                     if (data.containsKey('ViewKey')) {
                         record.Billing_Account_Unique_Key__c = (String) data.get('ViewKey');
-                    }
+                    }*/
                     
                     recordsToUpsert.add(record);
                 } catch (Exception ex) {
@@ -75,7 +77,7 @@ global class BillingAccountQueueable implements Queueable, Database.AllowsCallou
             }
             
             if (endIndex < apiResponse.size() && !Test.isRunningTest()) {
-                System.enqueueJob(new BillingAccountQueueable(apiResponse, endIndex));
+                System.enqueueJob(new BillingAccountQueueable(apiResponse, endIndex, fieldMappings));
             }
         } catch (Exception ex) {
             System.debug('Unexpected error: ' + ex.getMessage());

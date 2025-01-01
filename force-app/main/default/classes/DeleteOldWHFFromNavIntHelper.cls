@@ -13,7 +13,7 @@ public with sharing class DeleteOldWHFFromNavIntHelper {
         req.setMethod('POST');
         req.setHeader('Content-Type', 'application/json');
         req.setHeader('ApiKey', sett.Api_Key__c);
-        req.setEndpoint(sett.Endpoint__c+'v1/DeleteOneTimesheet/ITmyway/'+curUserName);
+        req.setEndpoint(sett.Endpoint__c+'/v1/DeleteOneTimesheet/ITmyway/'+curUserName);
         // setting body
         System.debug('Input Request:' + '{"id":"'+curNavId+'"}');
         req.setBody('{"id":"'+curNavId+'"}');
