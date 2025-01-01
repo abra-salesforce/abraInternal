@@ -1,0 +1,59 @@
+<aura:component controller="VoicenterLightningApexController"  implements="flexipage:availableForAllPageTypes" access="global" >
+    <!--<ltng:require scripts="/resource/1439967367000/VCStatic/VCStatic1" afterScriptsLoaded="{!c.VCMain}" />
+    <h1>Hello</h1>
+-->
+      <!-- Open SubTab -->
+	<lightning:workspaceAPI aura:id="workspace" />
+    <ltng:require scripts="/support/console/44.0/integration.js"></ltng:require>
+	<lightning:utilityBarAPI aura:id="utilitybar" />
+	<aura:attribute name="currentRecordId" type="String"/>
+	<aura:attribute name="platform" type="String"/>
+    <!--<ui:inputText aura:id="name" label="Enter Name:" placeholder="Your Name" />-->
+	<!--<ui:button aura:id="button" class="button" label="Click me" press="{!c.getInput}"/>-->
+	<ui:outputText aura:id="outName" value="" class="text"/>
+    <!--<aura:attribute name="tasks" type="Task[]" />
+    <aura:iteration items="{!v.tasks}" var="task" >
+        <force:recordView recordId="{!task.Id}" type="MINI" />
+    </aura:iteration>-->
+    
+    <!--Please do not delete this working example, you can comment or move if you want, Thx. Pavel --> 
+    <!--<ltng:require scripts="{!$Resource.VCStatic + '/VCStatic1.js'}" afterScriptsLoaded="{!c.jsLoad}" />-->
+    <!--<ltng:require scripts="{!$Resource.socket}" afterScriptsLoaded="{!c.jsLoadSocket}" />-->
+    <!--<ltng:require scripts="{!$Resource.VC}" afterScriptsLoaded="{!c.jsLoad2}" />-->
+    
+    <aura:handler name="init" value="{!this}" action="{!c.onLoad}"/>
+    <!--<aura:handler name="change" value="{!v.name}" action="{!c.itemsChange}"/>-->
+    <!--End -->
+    
+    <!--
+    
+    <ltng:require scripts="/resource/1439967367000/HelloWorldStatic" afterScriptsLoaded="{!c.jsLoad}" />
+    
+    
+    
+    <ltng:require scripts="{!join(',',
+	    'https://apiv1.voicenter.co.il/Scripts/voicenterSFpopupTestEfi.js',
+	    'https://voicenter-voicenterltd.netdna-ssl.com/voicenterMonitorListener.js')}"
+    	afterScriptsLoaded="{!c.afterScriptsLoaded}" />
+    <ltng:require scripts="{!$Resource.VCScript.js}" afterScriptsLoaded="{!c.afterScriptsLoaded}" />
+    
+  
+    
+    
+    <div id="caller-holder" style='background: #ff674d;
+               border-bottom: 2px solid #a62610;
+               border-radius: 5px;
+               max-width: 200px;
+               color: #fff;
+               font-family:Arial Rounded MT;
+               padding:3px 0 3px 20px;
+               margin-bottom:10px;
+               font-size:18px;
+               display:none;'>
+        <p style='margin-bottom:0px;'>
+            Incoming Call
+        </p>
+        <p style='margin-top:8px;' id="caller-name">-</p>
+        
+    </div>-->
+</aura:component>

@@ -1,0 +1,7 @@
+<apex:page standardController="Account" sidebar="false" showheader="false">
+    <script>
+    window.onload=function start(){
+        window.location.href='/apex/DynamicRelated?id={!Account.id}&obj=Issue__c';
+    }
+    </script>
+</apex:page>

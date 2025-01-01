@@ -1,0 +1,169 @@
+<apex:page Controller="BillingController" StandardStyleSheets="false" cache="false" showHeader="false" sidebar="false" docType="html-5.0">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons"/>
+    <link rel="stylesheet" href="https://code.getmdl.io/1.3.0/material.blue-light_blue.min.css"/>
+    <style>
+        td,th { 
+            padding: 0px !important;
+            margin: 0px !important;
+            vertical-align: middle !important;
+        }
+        .center{
+            text-align: center !important;
+        }
+        .input-select{
+            font-size: 16px;
+        }
+        .container{
+            padding-top: 10px;
+        }
+        .links{
+            cursor: pointer;
+            color: black;
+        }
+        .green{
+            background: #dafcd9;
+        }
+        .red{
+            background: #fcd9d9;
+        }
+        .inline{
+            text-align: center;
+            display: inline-block;
+            margin-right: 10%;
+        }
+    </style>
+    <script src="https://code.getmdl.io/1.3.0/material.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <script>
+        $ = jQuery.noConflict();
+        function refParent(obj){
+            var stat = true;
+            $.each($('[data-value='+JSON.stringify(String(obj.name))+']'),function (i,val){
+                if(!val.checked){
+                    stat = false;
+                }
+            });
+            obj.checked = stat;
+            if(!obj.checked){ 
+                $( obj ).closest('.parentcheck').removeClass('is-checked');
+            }
+            else{
+                $( obj ).closest('.parentcheck').addClass('is-checked');
+            }
+        }
+        function refClicks(obj){
+            if(!obj.checked){ 
+                $( obj ).closest('.childcheck').removeClass('is-checked');
+            }
+            else{
+                $( obj ).closest('.childcheck').addClass('is-checked');
+            }
+            refParent($('[name='+JSON.stringify(String($( obj ).data("value")))+']')[0]);
+        }
+        function ParentClick(obj){
+            if(obj.checked){
+                $.each($('[data-value='+JSON.stringify(String(obj.name))+']'),function (i,val){
+                    if(!val.checked){
+                        val.click();
+                    }
+                });
+            }
+            else{
+                $.each($('[data-value='+JSON.stringify(String(obj.name))+']'),function (i,val){
+                    if(val.checked){
+                        val.click();
+                    }
+                });
+            }
+        }
+        $( document ).ready(function() {
+            $.each($('.childbox'),function (i,val){
+                refClicks(val);
+            });
+        });
+    </script>
+    <apex:form >
+        <div align="center" class="container">
+            <b>Department: </b>
+            <apex:selectList styleclass="mdl-button mdl-button--raised mdl-js-ripple-effect mdl-button--colored input-select" value="{!curDep}" multiselect="false" size="1">
+                <apex:selectOptions value="{!deptypes}"/>
+                <apex:actionSupport event="onchange" action="{!departmentChange}"/>
+            </apex:selectList>
+            <br/><hr/>
+            <apex:outputPanel rendered="{!curDep!=''}">
+                <apex:selectList styleclass="mdl-button mdl-button--raised mdl-js-ripple-effect mdl-button--colored input-select" value="{!currentDat}" multiselect="false" size="1">
+                    <apex:selectOptions value="{!datops}"/>
+                </apex:selectList>&nbsp;
+                <apex:commandButton styleClass="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent" style="color:white;" value="Generate" action="{!getHours}"/>&nbsp;
+                <apex:commandButton styleClass="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--colored" value="Save Selected" action="{!SaveChecked}"/>
+                <br/>
+                <br/>
+                <apex:outputPanel id="all">
+                	<apex:commandButton styleClass="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--colored" value="Account Names until I" action="{!changeLessI}"/>
+                    <apex:commandButton styleClass="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--colored" value="Account Names bigger I" action="{!changeMoreI}"/>
+                    <table class="mdl-data-table mdl-js-data-table mdl-shadow--2dp" width="100%">
+                        <thead>
+                            <tr>
+                                <th class="center" width="5%">
+                                </th>
+                                <th class="mdl-data-table__cell--non-numeric" width="15%">Account</th>
+                                <th class="totals" width="80%">
+                                    <div class="inline">
+                                        Total Monthly Billable Hours<br/><span style="{!if(AND(OldBill!=0,OldBill!=Bill),'display:inline;color: red;','display:none;')}">{!OldBill}&nbsp;&#x2192;&nbsp;</span>{!Bill}
+                                    </div>
+                                    <div class="inline">
+                                        Total Monthly Price<br/><span style="{!if(AND(OldTotal!=0,OldTotal!=Total),'display:inline;color: red;','display:none;')}">{!OldTotal}&nbsp;&#x2192;&nbsp;</span>{!Total}&nbsp;ILS
+                                    </div>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <apex:repeat var="tord" value="{!AccNames}">
+                                <tr>
+                                    <td>
+                                        <label class="mdl-checkbox mdl-js-checkbox mdl-js-ripple-effect mdl-data-table__select parentcheck">
+                                            <input type="checkbox" name="{!JSENCODE(Ordrs[tord].AccountName)}" class="mdl-checkbox__input parentbox" onclick="ParentClick(this);"/>
+                                        </label>
+                                    </td>
+                                    <td class="mdl-data-table__cell--non-numeric"><u><a class="links" onclick="window.open('/{!Ordrs[tord].Ord.AccountId}');">{!Ordrs[tord].AccountName}</a></u></td>
+                                    <td>
+                                        <table class="mdl-data-table mdl-js-data-table mdl-shadow--2dp" width="100%">
+                                            <thead>
+                                                <tr>
+                                                    <th class="center" width="5%"></th>
+                                                    <th class="mdl-data-table__cell--non-numeric" width="27.5%">Project</th>
+                                                    <th class="mdl-data-table__cell--non-numeric" width="27.5%">Employee Type</th>
+                                                    <th class="center" width="10%">Billable Hours<br/><span style="{!if(AND(SubTotals[tord].OldBill!=0,SubTotals[tord].OldBill!=SubTotals[tord].Bill),'display:inline;color: red;','display:none;')}">{!SubTotals[tord].OldBill}&nbsp;&#x2192;&nbsp;</span>{!SubTotals[tord].Bill}</th>
+                                                    <th class="center" width="10%">Total Hours<br/>{!SubTotals[tord].Hours}</th>
+                                                    <th class="center" width="10%">Rate</th>
+                                                    <th class="center" width="10%">Total Price<br/><span style="{!if(AND(SubTotals[tord].OldTotal!=0,SubTotals[tord].OldTotal!=SubTotals[tord].Total),'display:inline;color: red;','display:none;')}">{!SubTotals[tord].OldTotal}&nbsp;&#x2192;&nbsp;</span>{!SubTotals[tord].Total}&nbsp;{!Ordrs[tord].Ord.CurrencyIsoCode}</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <apex:repeat var="tordi" value="{!Ordrs[tord].TordIs}">
+                                                    <tr class="{!if(Ordrs[tord].TordIs[tordi].Ordi.id!=null,'green','')} {!if(AND(OldValues[Ordrs[tord].TordIs[tordi].Ordi.Project__c+';'+ProdIds[Ordrs[tord].TordIs[tordi].EmployeeType]+';'+Ordrs[tord].TordIs[tordi].OrdI.Step__c]!=0,OldValues[Ordrs[tord].TordIs[tordi].Ordi.Project__c+';'+ProdIds[Ordrs[tord].TordIs[tordi].EmployeeType]+';'+Ordrs[tord].TordIs[tordi].OrdI.Step__c]!=Ordrs[tord].TordIs[tordi].OrdI.Quantity),'red','')}">
+                                                        <td class="center">
+                                                            <label class="mdl-checkbox mdl-js-checkbox mdl-js-ripple-effect mdl-data-table__select childcheck">
+                                                                <apex:inputCheckbox styleclass="mdl-checkbox__input childbox" html-data-value="{!JSENCODE(Ordrs[tord].AccountName)}" value="{!Ordrs[tord].TordIs[tordi].Checked}" onclick="refClicks(this);"/>
+                                                            </label>
+                                                        </td>                                
+                                                        <td class="mdl-data-table__cell--non-numeric"><u><a class="links" onclick="window.open('/{!Ordrs[tord].TordIs[tordi].OrdI.Project__c}');">{!Ordrs[tord].TordIs[tordi].ProjectName}</a></u></td>
+                                                        <td class="mdl-data-table__cell--non-numeric">{!Ordrs[tord].TordIs[tordi].EmployeeType}</td>
+                                                        <td class="center"><span style="{!if(AND(OldValues[Ordrs[tord].TordIs[tordi].Ordi.Project__c+';'+ProdIds[Ordrs[tord].TordIs[tordi].EmployeeType]+';'+Ordrs[tord].TordIs[tordi].OrdI.Step__c]!=0,OldValues[Ordrs[tord].TordIs[tordi].Ordi.Project__c+';'+ProdIds[Ordrs[tord].TordIs[tordi].EmployeeType]+';'+Ordrs[tord].TordIs[tordi].OrdI.Step__c]!=Ordrs[tord].TordIs[tordi].OrdI.Quantity),'display:inline;color: red;','display:none;')}">{!OldValues[Ordrs[tord].TordIs[tordi].Ordi.Project__c+';'+ProdIds[Ordrs[tord].TordIs[tordi].EmployeeType]+';'+Ordrs[tord].TordIs[tordi].OrdI.Step__c]}&nbsp;&#x2192;&nbsp;</span>{!Ordrs[tord].TordIs[tordi].OrdI.Quantity}</td>
+                                                        <td class="center">{!Ordrs[tord].TordIs[tordi].OrdI.Total_Hours__c}</td>
+                                                        <td class="center">{!Ordrs[tord].TordIs[tordi].OrdI.UnitPrice}&nbsp;{!Ordrs[tord].Ord.CurrencyIsoCode}<span style="{!if(TypeProdIds[Ordrs[tord].Ord.PriceBook2Id+';'+ProdIds[Ordrs[tord].TordIs[tordi].EmployeeType]+';'+Ordrs[tord].Ord.CurrencyIsoCode].UnitPrice!=Ordrs[tord].TordIs[tordi].OrdI.UnitPrice,'display:inline;color: red;','display:none;')}">&nbsp;(Step {!Ordrs[tord].TordIs[tordi].OrdI.Step__c})</span></td>
+                                                        <td class="center"><span style="{!if(AND(OldValues[Ordrs[tord].TordIs[tordi].Ordi.Project__c+';'+ProdIds[Ordrs[tord].TordIs[tordi].EmployeeType]+';'+Ordrs[tord].TordIs[tordi].OrdI.Step__c]!=0,OldValues[Ordrs[tord].TordIs[tordi].Ordi.Project__c+';'+ProdIds[Ordrs[tord].TordIs[tordi].EmployeeType]+';'+Ordrs[tord].TordIs[tordi].OrdI.Step__c]!=Ordrs[tord].TordIs[tordi].OrdI.Quantity),'display:inline;color: red;','display:none;')}">{!OldValues[Ordrs[tord].TordIs[tordi].Ordi.Project__c+';'+ProdIds[Ordrs[tord].TordIs[tordi].EmployeeType]+';'+Ordrs[tord].TordIs[tordi].OrdI.Step__c]*Ordrs[tord].TordIs[tordi].OrdI.UnitPrice}&nbsp;&#x2192;&nbsp;</span>{!Ordrs[tord].TordIs[tordi].OrdI.Quantity*Ordrs[tord].TordIs[tordi].OrdI.UnitPrice}&nbsp;{!Ordrs[tord].Ord.CurrencyIsoCode}</td>
+                                                    </tr>
+                                                </apex:repeat>
+                                            </tbody>
+                                        </table>
+                                    </td>
+                                </tr>
+                            </apex:repeat>
+                        </tbody>
+                    </table>
+                </apex:outputPanel>
+            </apex:outputPanel>
+        </div>
+    </apex:form>
+</apex:page>

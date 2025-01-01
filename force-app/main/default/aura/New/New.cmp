@@ -1,0 +1,6 @@
+<aura:component controller="currentContact" implements="force:appHostable,force:lightningQuickAction,flexipage:availableForAllPageTypes,forceCommunity:availableForAllPageTypes" access="global">
+    <aura:attribute name="Name" type="String"/>
+    <lightning:button variant="brand" label="New Working Day" onclick="{!c.doInit1}"/>
+    <lightning:button variant="brand" label="New Working Hour Salesforce" onclick="{!c.doInit2}"/>
+    <lightning:button variant="brand" label="New Working Hour IT" onclick="{!c.doInit3}"/>
+</aura:component>

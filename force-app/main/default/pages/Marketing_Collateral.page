@@ -1,0 +1,13 @@
+<apex:page >
+  <!-- Begin Default Content REMOVE THIS -->
+  <table border="0" cellpadding="2" width="100%">
+
+<tr>
+<td>
+  <iframe width='600' height='600' border='0' frameborder='0' allowtransparency='true' src='https://myubiqshare.com/WidgetLink/d86816a9-3d9c-f8c6-11ad-1340cde0bd6e/false'></iframe>
+  </td>
+  </tr>
+ 
+</table>
+  <!-- End Default Content REMOVE THIS -->
+</apex:page>

@@ -1,0 +1,3 @@
+<apex:page standardController="Account">
+<apex:iframe src="https://myubiqshare.com/#/vault/navigate-vault-files/nmsa000000008405/%2F{!Account.Name}/list" scrolling="true" id="theIframe" height="2000"/>
+</apex:page>

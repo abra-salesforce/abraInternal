@@ -1,0 +1,7 @@
+<apex:page standardController="Project__c" sidebar="false" showheader="false">
+    <script>
+    window.onload=function start(){
+        window.location.href='/apex/itmyway-apps__DynamicRelated?id={!Project__c.id}&obj=Working_Hours__c&vf='+window.location.href.split('/apex/')[1].split('?')[0]+'&theme='+(document.referrer.includes('lightning')?'true':'false');
+    }
+    </script>
+</apex:page>

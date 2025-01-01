@@ -1,0 +1,13 @@
+<aura:component controller="WorkerAssistantController">
+	<aura:attribute name="strid" type="String" />
+	<aura:attribute name="items" type="List"/>
+	<aura:handler name="init" value="{!this}" action="{!c.doInit}"/>
+	<div style="z-index: 1;position: relative;">
+		<b>Attached Files:</b><br/><br/>
+		<aura:iteration items="{!v.items}" var="content">
+			<lightning:button class="slds-m-bottom_small attchPills" label="{!content.Title}" name="{!content.Id}" onclick="{!c.previewFile}"/>
+		</aura:iteration>
+	</div>
+	<hr/>
+	<forceChatter:fullFeed type="Record" subjectId="{!v.strid}"/>
+</aura:component>

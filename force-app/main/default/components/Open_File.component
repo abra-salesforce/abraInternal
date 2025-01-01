@@ -1,0 +1,6 @@
+<apex:component >
+  <!-- Begin Default Content REMOVE THIS -->
+  <A HREF="file://///C:/Users/Eyal/Downloads/eyal zarankin.docx" TARGET="_blank">Open File</A>
+  This is your new Component
+  <!-- End Default Content REMOVE THIS -->
+</apex:component>

@@ -1,0 +1,7 @@
+<apex:page standardController="Account" sidebar="false" showheader="false">
+    <script>
+    window.onload=function start(){
+        window.location.href='/apex/itmyway-apps__DynamicRelated?id={!Account.id}&obj=Invoice__c&theme='+(document.referrer.includes('lightning')?'true':'false');
+    }
+    </script>
+</apex:page>

@@ -1,0 +1,332 @@
+<apex:page controller="StoreController" showHeader="false" sidebar="false"  docType="html-5.0">
+<title>ITmyWay Store</title>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css"/>
+<link rel="stylesheet" href="https://www.w3schools.com/lib/w3-theme-black.css"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.3.0/css/font-awesome.min.css"/>
+<style>
+  .w3-hover-opacity {
+    cursor: pointer;
+  }
+  .w3-card{
+    border-radius: 30px;
+    margin-bottom: 20px;
+    min-height:400px;
+    min-width:100px;
+  }
+  .w3-container {
+    //background-image:url("{!URLFOR($Resource.FreeTag)}");
+    background-repeat: no-repeat;
+    background-size: 70px;
+    padding: 0px;
+  }
+  .w3-modal-content{
+    border-radius: 20px;
+    margin-bottom: 20px;
+    max-width:550px;
+  }
+  .w3-button{
+    border-radius: 30px;
+  }
+  /* The Modal (background) */
+.modal {
+    display: none; /* Hidden by default */
+    position: fixed; /* Stay in place */
+    z-index: 1; /* Sit on top */
+    padding-top: 100px; /* Location of the box */
+    left: 0;
+    top: 0;
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    overflow: auto; /* Enable scroll if needed */
+    background-color: rgba(255,255,255,0.5) !important; /* Black w/ opacity */
+}
+.w3-modal{
+  background-color: rgba(255,255,255,0.5) !important; /* Black w/ opacity */
+}
+
+/* Modal Content */
+.modal-content {
+    background-color: #fefefe;
+    margin: auto;
+    padding-top: 20px;
+    padding-bottom: 20px;
+    padding-left: 200px;
+    padding-right: 20px;
+    border: 1px solid #888;
+    width: 50%;
+}
+
+/* The Close Button */
+.close {
+    color: #aaaaaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+    color: #000;
+    text-decoration: none;
+    cursor: pointer;
+}
+.requiredInput,.requiredBlock {
+    display: inline;
+}
+.mob {
+    width: 200px; 
+}
+.spa {
+  font-size:16px;
+  font-weight:bold;
+  color:black;
+}
+.sel,input[type="text"]{
+  width: 220px;
+  height: 30px;
+  background:white;
+}
+.left{
+  text-align:left;
+  padding-top:50px;
+}
+p{
+  text-align:left;
+}
+/*For width 1000px and larger: */
+@media only screen and (min-width: 1000px) {
+    .mob { 
+      width: 400px; 
+    }
+    .spa {
+      font-size:24px;
+      font-weight:bold;
+      color:black;
+    }
+}
+@media only screen and (max-width: 500px) {
+    h3 {
+      font-size: 17px;
+    }
+    h4 {
+      font-size: 15px;
+    }
+}
+
+.center{
+      text-align:center;
+    }
+.loader {
+    border: 10px solid white;
+    border-top: 10px solid #24a7e0; /* Blue */
+    border-radius: 50%;
+    width: 100px;
+    height: 100px;
+    margin-top:300px;
+    animation: spin 2s linear infinite;
+    display:none;
+}
+.overlay {
+    display:none;
+    background-color: rgba(255,255,255,0.8) !important; /* Black w/ opacity */
+    position:fixed;
+    width:100%;
+    height:100%;
+    top:0px;
+    left:0px;
+    z-index:1000;
+}
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+ul li {
+    list-style-position: outside;
+    text-align:left;
+    margin-left: 1em;
+}
+</style>
+<script>
+function SaveLoad() {
+                document.getElementById('load').style.display = 'block';
+                document.getElementById('overlay').style.display = 'block';
+                saveL();
+                document.getElementById('id01').style.display='none';
+                document.getElementById('id02').style.display='block';
+                unLoad();
+}
+function unLoad() {
+    document.getElementById('load').style.display = 'none';
+    document.getElementById('overlay').style.display = 'none';
+}
+</script>
+<body>
+<!-- Header -->
+<header class="w3-theme w3-padding" id="myHeader" style="background:white !important;">
+  <a href="http://itmyway.com" class="w3-bar-item w3-button" style="background:#24a7e0 !important;position:fixed;" onclick="toggleFunction()">Back To Site</a>
+  <div class="w3-center" style="padding-top:40px;">
+    <table width="100%">
+      <tr>
+        <td colspan="2">
+          <apex:image styleclass="mob" url="{!URLFOR($Resource.itmywaylogo)}"/>
+        </td>
+      </tr>
+      <tr>
+        <td colspan="2">
+          <span class="spa">Welcome to the ITmyWay Salesforce App Store!</span> 
+        </td>
+      </tr>
+      <tr>
+        <td colspan="2">
+          <span>The Apps have been developed by our Dev team and hope to solve some of the most common challenges Salesforce users and admins face.<br/>
+          This is just the beginning!  We plan on developing more nifty and very useful tools in the future.<br/>
+          Enjoy!<br/>
+          The ITmyWay Team.
+          </span> 
+        </td>
+      </tr>
+    </table>
+    <div class="w3-padding-12">
+    </div>
+  </div>
+</header>
+
+
+<!-- Modal -->
+<div id="id02" class="w3-modal">
+    <div class="w3-modal-content w3-card-4 w3-animate-top">
+      <apex:form >
+      <header> 
+        <span onclick="removeHash();"
+        class="w3-button w3-display-topright">×</span>
+        <h3 style="font-size:24px;color: #24a7e0;">Success</h3>
+      </header>
+      <div class="w3-padding" align="center">
+        A link to the package has been sent to you by email
+      </div>
+      </apex:form>
+    </div>
+</div>
+<!-- Modal -->
+<div id="id01" class="w3-modal">
+    <div class="w3-modal-content w3-card-4 w3-animate-top">
+      <apex:outputPanel id="myform">
+      <apex:form >
+      <apex:actionFunction name="saveL" action="{!saveLead}" reRender="myform"/>
+      <header style="height:38px;"> 
+          <div id="overlay" align="center" class="overlay"><div id="load" class="loader"/></div>
+        <span onclick="removeHash();" style="z-index:100;" class="w3-button w3-display-topright">×</span>
+      </header>
+      <div class="w3-padding" align="center">
+        <table>
+        <tr>
+          <td colspan="2">
+            <h3 style="font-size:24px;color: #24a7e0;">Register Now to Get the App</h3>  
+          </td>
+        </tr>
+        <tr>
+          <td colspan="2">
+            &nbsp;
+          </td>
+        </tr>
+        <tr>
+        <td><h4><span style="color:red;padding:3px;">*</span>First Name  </h4></td><td style="text-align:right;"><apex:inputField value="{!lead.FirstName}" required="true"/></td>
+        </tr>
+        <tr>
+        <td><h4><span style="color:red;padding:3px;">*</span>Last Name  </h4></td><td style="text-align:right;"><apex:inputField value="{!lead.LastName}" required="true"/></td>
+        </tr>
+        <tr>
+        <td><h4><span style="color:red;padding:3px;">*</span>Company  </h4></td><td style="text-align:right;"><apex:inputField value="{!lead.Company}" required="true"/></td>
+        </tr>
+        <tr>
+        <td><h4><span style="color:red;padding:3px;">*</span>Country  </h4></td><td style="text-align:right;"><apex:inputField styleClass="sel" value="{!lead.CountryCode}" required="true"/></td>
+        </tr>
+        <tr>
+        <td><h4><span style="color:red;padding:3px;">*</span>Email  </h4></td><td style="text-align:right;"><apex:inputField html-pattern=".{3,60}@+.{3,60}[.]+.{2,60}" value="{!lead.Email}" required="true"/></td>
+        </tr>
+        <tr>
+        <td><h4><span style="color:white;padding:3px;">*</span>Phone  </h4></td><td style="text-align:right;"><apex:inputField value="{!lead.Phone}"/></td>
+        </tr>
+        <tr>
+        <td>&nbsp;</td>
+        </tr>
+        <tr>
+        <td colspan="2" style="padding:3px;"><apex:inputField value="{!lead.newsletter__c}"/><apex:inputField styleClass="prod" style="display:none;" value="{!lead.LeadSource}"/>&nbsp;<h4>Join our Newsletter</h4></td>
+        </tr>
+        <tr>
+        <td colspan="2" style="padding:3px;"><apex:inputField value="{!lead.Terms__c}" required="true"/>&nbsp;<h4>Agree to <a href="{!URLFOR($Resource.TCStore)}" target="_blank"><u style="cursor:pointer;">Terms and Conditions</u></a></h4></td>
+        </tr>
+        </table>
+      </div>
+      <footer>
+      <div align="center">
+      <br/>
+      <apex:commandButton style="font-size:24px;background: #24a7e0 !important;color: white; border:0px solid black; border-radius:30px; padding: 4px 20px 4px 20px;" value="Get it Now" oncomplete="SaveLoad();"/>
+      <br/>&nbsp;
+      </div>
+      </footer>
+      </apex:form>
+      </apex:outputPanel>
+    </div>
+</div>
+<div class="w3-row-padding w3-center w3-margin-top">
+<div class="w3-quarter w3-hover-opacity">&nbsp;</div>
+
+<div class="w3-quarter w3-hover-opacity" onclick="document.getElementById('id01').style.display='block';setProd('Store Currency');addHash();">
+  <div class="w3-card w3-container"><br/>
+  <h3 style="color: #24a7e0;">Currency Updater</h3><br/><br/>
+  <apex:image url="{!URLFOR($Resource.currencylogo)}" width="120"/><br/>
+  <ul>
+    <li>Currency Rate Updater<br/>&nbsp;</li>
+    <li>Daily Flexible Schedule<br/>&nbsp;</li>
+    <li>Uses European Central Bank Data</li>
+  </ul>
+  </div>
+</div>
+<div class="w3-quarter w3-hover-opacity" onclick="document.getElementById('id01').style.display='block';setProd('Store Inline Edit');addHash();">
+  <div class="w3-card w3-container"><br/>
+  <h3 style="color: #24a7e0;">Inline Edit Related Lists</h3><br/><br/>
+  <apex:image url="{!URLFOR($Resource.editlogo)}" width="120"/>
+  <ul>
+    <li>Related List with Inline Edit Support<br/>&nbsp;</li>
+    <li>Supports Father, Child, GrandChild, Brother Records<br/>&nbsp;</li>
+    <li>Supports Lightning &amp; Classic</li>
+  </ul>
+  </div>
+</div>
+<div class="w3-quarter w3-hover-opacity">&nbsp;</div>
+</div>
+<div class="w3-padding-32">
+    </div>
+  <script>
+  //document.addEventListener('contextmenu', event => event.preventDefault());
+
+  function setProd(val) {
+  var pick=document.getElementsByClassName('prod')[0];
+    for(var i=0;i<pick.options.length;i++)
+      if(pick.options[i].value==val)
+        pick.options[i].selected=true;
+  }
+    window.addEventListener("popstate", function() {
+      if(location.hash != '#openpop') {
+            document.getElementById('id01').style.display='none';
+            document.getElementById('id02').style.display='none';
+      }
+    }, false);
+    function removeHash () { 
+      window.history.back();
+    }
+    function addHash () { 
+      window.location.hash = 'openpop';
+    }
+  </script>
+  
+</body>
+<footer class="w3-theme-l1" style="width: 100%;height: 45px;position: fixed;bottom: 0px;">
+      <div align="center">
+                <span style="font-size:13px;">Copyright © 2003-2018 P2C Systems LTD. All Rights Reserved.</span><span style="font-size:10px;">(Made By ZedXagE)</span>
+      </div>
+</footer>
+</apex:page>

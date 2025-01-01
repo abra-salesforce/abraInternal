@@ -1,0 +1,776 @@
+<template>
+    <div class="container">
+        <div class="mainview">
+            <lightning-card>
+                <div slot="title" class="checkFont pgheader">
+                    {hello}&#128512;
+                    &nbsp;
+                    <span style="font-size:x-small;white-space: pre-wrap;">
+                        Hours Today in System (Billable/Total): <a onclick={showWAS}>{billableHours}/{totalHours}</a>
+                        <br/>
+                        Hours Today in Cache: {cachetotalHours}
+                        <template if:true={wd}>
+                            <br/>
+                            <template if:true={wd.Total_Hours__c}>
+                                Total WD Hours: {wd.Total_Hours__c}
+                            </template>
+                            &nbsp;
+                            <a style="font-size:x-small" onclick={showWD}>
+                                edit WD
+                            </a>
+                        </template>
+                    </span>
+                </div>
+                <template if:true={isLoading}>
+                    <div class="loadingclass">
+                        <lightning-spinner alternative-text="Loading" size="large"></lightning-spinner>
+                    </div>
+                </template>
+                <div slot="actions" class="pgheader">
+                    <span style="font-size:x-small">
+                        <div class="clearfix">
+                            <div class={billableClass}>
+                                <span>{billablePercentage}%</span>
+                                <div class="slice">
+                                    <div class="bar"></div>
+                                    <div class="fill"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </span>
+                    &nbsp;
+                    <span style="text-align:center;color:red;">
+                        {msg}
+                    </span>
+                    &nbsp;
+                    <lightning-icon class="boxbut" icon-name="action:refresh" alternative-text="refresh" onclick={refData} size="x-small"></lightning-icon>
+                </div>
+                <div class="toppad bot pgheader" data-wd="true" style="font-size:x-small;display:none;">
+                    <template if:true={wd}>
+                            <div>
+                                Start&nbsp;&nbsp;<lightning-input style="flex: 1 1 auto;" type="datetime" name="Start__c" value={wd.Start__c} onchange={changeValDat} autocomplete="off"></lightning-input>
+                                &nbsp;&nbsp;End&nbsp;&nbsp;<lightning-input style="flex: 1 1 auto;" type="datetime" name="End__c" value={wd.End__c} onchange={changeValDat}  autocomplete="off"></lightning-input>
+                                &nbsp;&nbsp;Location&nbsp;&nbsp;
+                                <select class="slds-select" name="Location__c" slot="actions" size="1" onchange={changeValDat}>
+                                    <template for:each={locations} for:item="loc">
+                                        <option key={loc.value} value={loc.value} selected={loc.sel}>{loc.label}</option>
+                                    </template>
+                                </select>
+                            </div>
+                            <div style="text-align: right;flex: auto;text-align:right;">
+                                <lightning-button variant="brand" label="save" title="save" class="slds-m-left_x-small" onclick={saveWD}></lightning-button>
+                            </div>
+                    </template>
+                </div>
+                <div class="containerContent">
+                    <template if:false={wdCheckOK}>
+                        <div style="position: absolute;
+                        -webkit-user-select: none;
+                        -khtml-user-select: none;
+                        -moz-user-select: none;
+                        -o-user-select: none;
+                        user-select: none;
+                        width: 100%;
+                        height: 100%;
+                        background-color: black;
+                        opacity: 0.2;
+                        z-index: 10;"></div>
+                    </template>
+                    <div class="toppad bot" data-was="true" style="font-size:small;display:none;">
+                        <form>
+                            <table class="slds-table slds-table_cell-buffer slds-table_bordered">
+                                <thead>
+                                    <tr class="slds-line-height_reset">
+                                        <th class="" scope="col">
+                                            <div class="slds-truncate" title="WH">WH</div>
+                                        </th>
+                                        <th class="" scope="col">
+                                            <div class="slds-truncate" title="Project">Project</div>
+                                        </th>
+                                        <th class="" scope="col">
+                                            <div class="slds-truncate" title="Scope">Scope</div>
+                                        </th>
+                                        <th class="" scope="col">
+                                            <div class="slds-truncate" title="Issue">Issue</div>
+                                        </th>
+                                        <th class="" style="max-width:25%;" scope="col">
+                                            <div class="slds-truncate" title="Hours"></div>
+                                        </th>
+                                        <th class="" style="max-width:30%;" scope="col">
+                                            <div class="slds-truncate" title="Description"></div>
+                                        </th>
+                                        <template if:true={pm}>
+                                            <th class="" style="max-width:30%;" scope="col">
+                                                <div class="slds-truncate" title="Not Billable"></div>
+                                            </th>
+                                        </template>
+                                        <th class="" style="max-width:30%;" scope="col">
+                                            <div class="slds-truncate" title=""></div>
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody style="vertical-align: top;">
+                                    <template for:each={was} for:item="wa">
+                                        <tr key={wa.id} class="slds-hint-parent">
+                                            <td data-label="WH">
+                                                <div class="slds-truncate" title={wa.name}><a data-recid={wa.id} onclick={newWin}>{wa.name}</a></div>
+                                            </td>
+                                            <td data-label="Project">
+                                                <div class="slds-truncate" title={wa.projname}><a data-recid={wa.projid} onclick={newWin}>{wa.projname}</a></div>
+                                            </td>
+                                            <td data-label="Scope">
+                                                <div class="slds-truncate" title={wa.scopename}><a data-recid={wa.scopeid} onclick={newWin}>{wa.scopename}</a></div>
+                                            </td>
+                                            <td data-label="Issue">
+                                                <div class="slds-truncate" title={wa.issname}><a data-recid={wa.issid} onclick={newWin}>{wa.issname}</a></div>
+                                            </td>
+                                            <td data-label="Issue" style="max-width:25%;">
+                                                <div class="slds-truncate" title={wa.num}>
+                                                    <lightning-input data-recid={wa.id} label="Hours" type="number" name="num" value={wa.num} onchange={changeWA} step="0.25" required></lightning-input>
+                                                </div>
+                                            </td>
+                                            <td data-label="Description" style="max-width:30%;">
+                                                <div class="slds-truncate" title={wa.description}>
+                                                    <lightning-textarea data-recid={wa.id} name="desc" label="Description of work" value={wa.description} onchange={changeWA} required></lightning-textarea>
+                                                </div>
+                                            </td>
+                                            <template if:true={pm}>
+                                                <td data-label="Not Billable">
+                                                    <div class="slds-truncate" title="Not Billable">
+                                                        <lightning-input data-recid={wa.id} type="checkbox" name="notbill" label="Not Billable" checked={wa.notbill} onchange={changeWA}></lightning-input>
+                                                    </div>
+                                                </td>
+                                            </template>
+                                            <td>
+                                                <div class="slds-truncate" title="Delete">
+                                                    <lightning-button variant="brand" data-recid={wa.id} label="delete" title="delete" class="slds-m-left_-small" onclick={deleteWA}></lightning-button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </template>
+                                </tbody>
+                            </table>
+                            <div style="width:100%;text-align:center;">
+                                <lightning-button variant="brand" label="save" title="save" class="slds-m-left_-small" onclick={saveWAS}></lightning-button>
+                            </div>
+                        </form>
+                    </div>
+                    <div>
+                        <div class="pgheader toppad bot">
+                            <div style="font-size: x-small;flex: 100%;">
+                                Add:
+                            </div>
+                            <div style="flex: 1 1 0;">
+                                <select class="slds-select checkFont" size="1" onchange={pickChange}>
+                                    <option value="">--Employees--</option>
+                                    <template for:each={adtResources} for:item="res">
+                                        <option key={res.id} value={res.id}>{res.name}</option>
+                                    </template>
+                                </select>
+                            </div>
+                            &nbsp;
+                            <div style="flex: 1 1 0;">
+                                <select class="slds-select checkFont" size="1" onchange={scopChange}>
+                                    <option value="">--Scopes--</option>
+                                    <template for:each={activeScopes} for:item="scop">
+                                        <option key={scop.id} value={scop.id}>{scop.zvname}</option>
+                                    </template>
+                                </select>
+                            </div>
+                            &nbsp;
+                            <template if:true={noFiltersProj}>
+                                <lightning-icon icon-name="utility:filterList" style="display:inline-flex;align-items: center;" alternative-text="filter" size="x-small" onclick={toggleFilter}></lightning-icon>
+                            </template>
+                            <template if:false={noFiltersProj}>
+                                <lightning-icon icon-name="utility:filterList" style="display:inline-flex;align-items: center;" alternative-text="filter" variant="error" size="x-small" onclick={toggleFilter}></lightning-icon>
+                            </template>
+                        </div>
+                    </div>
+                    <template if:true={showFilters}>
+                        <div class="toppad bot">
+                            <div style="font-size: x-small;">
+                                <u>Filters</u>
+                            </div>
+                            <div style="font-size: x-small;">
+                                Projects: <a onclick={resetProjects}>reset</a>
+                            </div>
+                            <div>
+                                <div>
+                                    <select class="slds-select checkFont" size="1" onchange={changeProject}>
+                                        <option value="">--Projects--</option>
+                                        <template if:true={projects.length}>
+                                            <template for:each={projects} for:item="proj">
+                                                <template if:false={proj.sel}>
+                                                    <option key={proj.value} value={proj.value}>{proj.label}</option>
+                                                </template>
+                                            </template>
+                                        </template>
+                                    </select>
+                                </div>
+                                <div class="slds-pill_container fixedscrolling">
+                                    <template if:true={projects.length}>
+                                        <template for:each={projects} for:item="proj">
+                                            <template if:true={proj.sel}>
+                                                <span key={proj.value} data-value={proj.value} class="slds-pill slds-pill_link">
+                                                    <a class="slds-pill__action" style="padding: 2px;" data-value={proj.value} title={proj.label} onclick={toggleProject}>
+                                                        <span data-value={proj.value} class="slds-pill__label">{proj.label}</span>
+                                                        <lightning-icon data-value={proj.value} icon-name="utility:close" alternative-text="close" size="x-small"></lightning-icon>
+                                                    </a>
+                                                </span>
+                                            </template>
+                                        </template>
+                                    </template>
+                                </div>
+                            </div>
+                            <div style="font-size: x-small;">
+                                Statuses: <a onclick={resetStatuses}>reset default</a>
+                            </div>
+                            <div>
+                                <div class="slds-pill_container fixedscrolling">
+                                    <template for:each={statuses} for:item="stat">
+                                        <span key={stat.value} data-value={stat.value} class="slds-pill slds-pill_link">
+                                            <template if:false={stat.sel}>
+                                                <a class="slds-pill__action" style="padding: 2px;" data-value={stat.value} title={stat.label} onclick={toggleStatus}>
+                                                    <span data-value={stat.value} class="slds-pill__label">{stat.label}</span>
+                                                </a>
+                                            </template>
+                                            <template if:true={stat.sel}>
+                                                <a class="slds-pill__action" data-value={stat.value} style="padding: 2px;color: white;background: #2F4371;" title={stat.label} onclick={toggleStatus}>
+                                                    <span data-value={stat.value} class="slds-pill__label">{stat.label}</span>
+                                                    <lightning-icon data-value={stat.value} icon-name="utility:check" alternative-text="close" variant="success" size="xx-small"></lightning-icon>
+                                                </a>
+                                            </template>
+                                        </span>
+                                    </template>
+                                </div>
+                            </div>
+                        </div>
+                    </template>
+                    <template if:true={issuestr}>
+                        <div class="centered toppad bot" style="font-style: 1rem; background:lightgreen;">{issuename} Running Time: {issuestr}</div>
+                    </template>
+                    <template if:true={hasscope}>
+                        <div class="centered toppad bggray">
+                            Scopes
+                        </div>
+                        <div class="scrolling">
+                            <template if:true={shownScopes.length}>
+                                <template for:each={shownScopes} for:item="scop">
+                                    <template if:false={scop.isFiltered}>
+                                        <div key={scop.id} data-recid={scop.id} class="project minwidth box">
+                                            <div class="line"></div>
+                                            <div style="white-space:nowrap;">
+                                                <b style="display:flex;">
+                                                    <div>
+                                                        <a data-recid={scop.id} onclick={removeScope}>
+                                                            <lightning-icon data-recid={scop.id} icon-name="utility:close" alternative-text="close" size="x-small"></lightning-icon>
+                                                        </a>
+                                                        <div style="display:inline-block;border-radius:5px;padding:5px;border:1px solid lightgray;" class={scop.wh.boxstyle} title="In Work"></div>
+                                                        &nbsp;<a data-recid={scop.id} onclick={newWin}>{scop.name}</a>
+                                                    </div>
+                                                    <div style="flex: 1 1 auto;text-align: right;">
+                                                        &nbsp;
+                                                        <a data-recid={scop.id} onclick={moveScopeLeft}>
+                                                            <lightning-icon data-recid={scop.id} icon-name="utility:chevronleft" alternative-text="left" size="x-small"></lightning-icon>
+                                                        </a>
+                                                        &nbsp;
+                                                        <a data-recid={scop.id} onclick={moveScopeRight}>
+                                                            <lightning-icon data-recid={scop.id} icon-name="utility:chevronright" alternative-text="right" size="x-small"></lightning-icon>
+                                                        </a>
+                                                        &nbsp;{scop.wh.runtime}&nbsp;
+                                                        <a class={scop.wh.playstyle} data-recid={scop.id} onclick={workPlay}>
+                                                            <lightning-icon data-recid={scop.id} icon-name="utility:play" alternative-text="play" size="x-small"></lightning-icon>
+                                                        </a>&nbsp;
+                                                        <a class={scop.wh.pausestyle} data-recid={scop.id} onclick={workPause}>
+                                                            <lightning-icon data-recid={scop.id} icon-name="utility:pause" alternative-text="pause" size="x-small"></lightning-icon>
+                                                        </a>&nbsp;
+                                                        <a class={scop.wh.playstyle} data-recid={scop.id} onclick={showEdtWH}>
+                                                            <lightning-icon data-recid={scop.id} icon-name="utility:edit" alternative-text="edit" size="x-small"></lightning-icon>
+                                                        </a>&nbsp;
+                                                        <a data-recid={scop.id} onclick={workStop}>
+                                                            <lightning-icon data-recid={scop.id} icon-name="utility:stop" alternative-text="stop" size="x-small"></lightning-icon>
+                                                        </a>                                    
+                                                    </div>
+                                                </b>
+                                            </div>
+                                            <lightning-input label="Mins" style="display:none;" data-isedt="true" data-recid={scop.id} data-strt={scop.id} type="number" name="worktime" value={scop.wh.inputtime} step="0.01" onchange={edtWorkTime}></lightning-input>
+                                            <div>Account: <a data-recid={scop.accid} onclick={newWin}>{scop.accname}</a></div>
+                                            <div>Project: <a data-recid={scop.projid} onclick={newWin}>{scop.projname}</a></div>
+                                            <div>{scop.startDate} - {scop.endDate}</div>
+                                            <div style="display:block;">
+                                                <div style="display:inline-block;">Billable hours / Budget: {scop.billhours} / {scop.budget}</div>
+                                                <div style="float: right;">&nbsp;<b><a data-rid={scop.id} onclick={newIssue}><lightning-icon data-rid={scop.id} icon-name="utility:new" alternative-text="new" size="x-small"></lightning-icon></a>&nbsp;&nbsp;<a data-wh={scop.id} onclick={newWH}>WH</a></b></div>
+                                            </div>
+                                            <div style="display:none;" class="toppad white" data-newwh={scop.id}>
+                                                <form data-formid={scop.id}>
+                                                    <lightning-input data-recid={scop.id} type="date" name="curdate" label="Date" value={scop.wh.curdate} onchange={changeValScope} required></lightning-input>
+                                                    <lightning-input data-recid={scop.id} type="number" name="numofhours" label="Hours" value={scop.wh.numofhours} onchange={changeValScope} step="0.25" required></lightning-input>
+                                                    <lightning-textarea data-recid={scop.id} name="curtext" label="Description of work" value={scop.wh.curtext} onchange={changeValScope} required></lightning-textarea>
+                                                    <template if:true={pm}>
+                                                        <lightning-input data-recid={scop.id} type="checkbox" name="notbill" label="Not Billable" checked={scop.wh.notbill} onchange={changeValScope}></lightning-input>
+                                                    </template>
+                                                    <div class="centered"><lightning-button variant="brand" data-project={scop.projid} data-scope={scop.id} data-account={scop.accid} label="save" title="save" class="slds-m-left_x-small" onclick={saveWH}></lightning-button></div>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </template>
+                                </template>
+                            </template>
+                        </div>
+                        <div class="centered botpad bggray">
+                            Issues
+                        </div>
+                    </template>
+                    <div id="columns" class="scrolling">
+                        <template if:true={shownResources.length}>
+                            <template for:each={shownResources} for:item="res">
+                                <template if:false={res.isFiltered}>
+                                    <div key={res.id} title={res.name} class={res.rescolclass}>
+                                        <template if:true={res.assigned}>
+                                            <div class="centered"><b>Open Issues - Assigned to me</b> ({res.numiss})</div>
+                                        </template>
+                                        <template if:false={res.assigned}>
+                                            <div class="centered">
+                                                <a data-recid={res.id} onclick={moveResLeft}>
+                                                    <lightning-icon data-recid={res.id} icon-name="utility:chevronleft" alternative-text="left" size="x-small"></lightning-icon>
+                                                </a>&nbsp;&nbsp;
+                                                <template if:false={res.okview}>
+                                                    <a data-recid={res.id} onclick={removeRes}>
+                                                        <lightning-icon data-recid={res.id} icon-name="utility:close" alternative-text="close" size="x-small"></lightning-icon>
+                                                    </a>
+                                                </template>
+                                                <template if:false={res.isOffline}>
+                                                    <div style="display:inline-block;border-radius:5px;padding:5px;border:1px solid lightgray;background: #90EE8F;" title={res.hoursOfWork}></div>
+                                                </template>
+                                                <template if:true={res.isOffline}>
+                                                    <div style="display:inline-block;border-radius:5px;padding:5px;border:1px solid lightgray;background: red;" title={res.hoursOfWork}></div>
+                                                </template>
+                                                <b>{res.name}</b> ({res.numiss})&nbsp;<lightning-input style="display: inline-block;" data-recid={res.id} type="checkbox" name="showall" checked={res.showall} variant="label-hidden" onchange={changeValShow} title="Show all issues"></lightning-input>
+                                                &nbsp;<a data-recid={res.id} onclick={moveResRight}>
+                                                    <lightning-icon data-recid={res.id} icon-name="utility:chevronright" alternative-text="right" size="x-small"></lightning-icon>
+                                                </a>
+                                            </div>
+                                        </template>
+                                        <template for:each={res.issues} for:item="is">
+                                            <template if:true={is.showit}>
+                                                <template if:false={is.isFiltered}>
+                                                    <div key={is.id} data-parent={res.id} data-recid={is.id} data-pos={is.queue} class={is.colclass} draggable={admin} ondragstart={handleDragStart} ondragenter={handleDragEnter} ondragover={handleDragOver} ondragleave={handleDragLeave} ondrop={handleDrop}>
+                                                        <div style="white-space:nowrap;">
+                                                            <b>
+                                                                <div style="display:inline-block;width:50%;">
+                                                                    <div style="display:inline-block;border-radius:5px;padding:5px;border:1px solid lightgray;" class={is.wh.boxstyle} title="In Work"></div>
+                                                                    <template if:false={is.issueminebol}>
+                                                                        &nbsp;
+                                                                        <div style="display:inline-block;border-radius:5px;padding:5px;border:1px solid lightgray;" class={is.running} title="Assigned to is working"></div>
+                                                                    </template>
+                                                                    &nbsp;<a data-recid={is.id} onclick={newWin}>{is.name}</a>
+                                                                </div>
+                                                                <div style="display:inline-block;text-align: right;width:50%;">
+                                                                    &nbsp;{is.wh.runtime}&nbsp;
+                                                                    <template if:false={is.noTimer}>
+                                                                        <a class={is.wh.playstyle} data-recid={is.id} data-ismine={is.issuemine} onclick={workPlay}>
+                                                                            <lightning-icon data-recid={is.id} data-ismine={is.issuemine} icon-name="utility:play" alternative-text="play" size="x-small"></lightning-icon>
+                                                                        </a>&nbsp;
+                                                                        <a class={is.wh.pausestyle} data-recid={is.id} data-ismine={is.issuemine} onclick={workPause}>
+                                                                            <lightning-icon data-recid={is.id} data-ismine={is.issuemine} icon-name="utility:pause" alternative-text="pause" size="x-small"></lightning-icon>
+                                                                        </a>&nbsp;
+                                                                        <a class={is.wh.playstyle} data-recid={is.id} data-ismine={is.issuemine} onclick={showEdtWH}>
+                                                                            <lightning-icon data-recid={is.id} data-ismine={is.issuemine} icon-name="utility:edit" alternative-text="edit" size="x-small"></lightning-icon>
+                                                                        </a>&nbsp;
+                                                                        <a data-recid={is.id} data-ismine={is.issuemine} onclick={workStop}>
+                                                                            <lightning-icon data-recid={is.id} data-ismine={is.issuemine} icon-name="utility:stop" alternative-text="stop" size="x-small"></lightning-icon>
+                                                                        </a>&nbsp;
+                                                                    </template>
+                                                                    {is.queue}
+                                                                </div>
+                                                            </b>
+                                                        </div>
+                                                        <lightning-input label="Mins" style="display:none;" data-isedt="true" data-recid={is.id} data-strt={is.id} type="number" name="worktime" value={is.wh.inputtime} step="0.01" onchange={edtWorkTime}></lightning-input>
+                                                        <div class="centered">
+                                                            <select id={is.id} name={is.id} class="slds-select" data-recid={is.id} data-hrs={is.totalhrs} slot="actions" size="1" onchange={changeStats}>
+                                                                <template if:false={is.noTimer}>
+                                                                    <template for:each={is.statuses} for:item="op">
+                                                                        <option key={op.value} value={op.value} selected={op.sel}>{op.label}</option>
+                                                                    </template>
+                                                                </template>
+                                                                <template if:true={is.noTimer}>
+                                                                    <option disabled="true" value={is.status} selected>{is.status}</option>
+                                                                </template>
+                                                            </select>
+                                                            <template if:true={is.isest}>
+                                                                <lightning-input data-devest={is.id} type="number" name="devest" label="Dev Estimation" value={is.devest} step="0.25"></lightning-input>
+                                                            </template>
+                                                        </div>
+                                                        <template if:true={is.hasdelivery}>
+                                                            <div class="wb">Delivery Type: {is.delivery}</div>
+                                                        </template>
+                                                        <div class="wb">Name: {is.textname} <template if:true={is.isbug}><lightning-icon icon-name="utility:bug" alternative-text="bug" variant="error" size="xx-small"></lightning-icon></template></div>
+                                                        <div class="wb">Account: <a data-recid={is.accid} onclick={newWin}>{is.accname}</a></div>
+                                                        <div style="display:block;">
+                                                            <div style="display:inline-block;">Owner: {is.ownername}</div>
+                                                            <div style="float: right;"><a data-rid={is.id} onclick={newIssue}><lightning-icon data-rid={is.id} icon-name="utility:new" alternative-text="new" size="x-small" style="fill:darkblue"></lightning-icon></a>&nbsp;&nbsp;<a data-recid={is.id} onclick={editIssue}><lightning-icon data-recid={is.id} icon-name="utility:edit_form" alternative-text="edit issue" size="x-small"></lightning-icon></a>&nbsp;&nbsp;<a data-recid={is.id} onclick={toggleView}>Info</a></a></div>
+                                                        </div>
+                                                        <div style="display:none;" data-det={is.id}>
+                                                            <template if:true={is.projid}>
+                                                                <div class="wb">Project: <a data-recid={is.projid} onclick={newWin}>{is.projname}</a></div>
+                                                            </template>
+                                                            <template if:true={is.scopeid}>
+                                                                <div class="wb">Scope: <a data-recid={is.scopeid} onclick={newWin}>{is.scopename}</a></div>
+                                                            </template>
+                                                            <template if:true={is.relid}>
+                                                                <div class="wb">Release: <a data-recid={is.relid} onclick={newWin}>{is.relname}</a></div>
+                                                            </template>
+                                                            <template if:true={is.parentid}>
+                                                                <div class="wb">Correlated to Issue: <a data-recid={is.parentid} onclick={newWin}>{is.parentname}</a></div>
+                                                            </template>
+                                                            <div class="wb">Budget: {is.budget}</div>
+                                                            <template if:false={is.isest}>
+                                                                <template if:true={is.hasest}>
+                                                                    <div class="wb">Dev Estimation: {is.devest}</div>
+                                                                </template>
+                                                            </template>
+                                                            <div class="wb">Billable Hours: {is.billable}</div>
+                                                            <div class="wb">Due Date: <lightning-formatted-date-time value={is.dat} year="2-digit" month="2-digit" day="2-digit"></lightning-formatted-date-time></div>
+                                                            <template if:true={is.logid}>
+                                                                <div class="wb">Work: <lightning-formatted-rich-text value={is.logurl}></lightning-formatted-rich-text> - <a data-recid={is.logid} onclick={newWin}>{is.logname}</a></div>
+                                                            </template>
+                                                            <template if:true={is.uatlogid}>
+                                                                <div class="wb">UAT: <lightning-formatted-rich-text value={is.uatlogurl}></lightning-formatted-rich-text> - <a data-recid={is.uatlogid} onclick={newWin}>{is.uatlogname}</a></div>
+                                                            </template>
+                                                            <template if:true={is.deplogid}>
+                                                                <div class="wb">Production: <lightning-formatted-rich-text value={is.deplogurl}></lightning-formatted-rich-text> - <a data-recid={is.deplogid} onclick={newWin}>{is.deplogname}</a></div>
+                                                            </template>
+                                                            <div class="toppad white">
+                                                                <div style="display:block;">
+                                                                    <b>
+                                                                        <div class="third"><a data-more={is.id} onclick={moreDat}>Details</a></div>
+                                                                        <div class="third centered">
+                                                                            <a data-chat={is.id} onclick={showChatter}>
+                                                                                <template if:true={is.chatterNotify}>
+                                                                                    <div data-chat={is.id} style="display:inline-block;border-radius:5px;padding:5px;border:1px solid lightgray;background:red;"></div>&nbsp;
+                                                                                </template>
+                                                                                Files &amp; Chatter
+                                                                            </a>
+                                                                        </div>
+                                                                        <div style="float: right;"><a data-wh={is.id} onclick={newWH}>WH</a></div>
+                                                                    </b>
+                                                                </div>
+                                                                <div style="display:none;" data-newwh={is.id}>
+                                                                    <form data-formid={is.id}>
+                                                                        <lightning-input data-recid={is.id} data-parent={res.id} type="date" name="curdate" label="Date" value={is.wh.curdate} onchange={changeVal} required></lightning-input>
+                                                                        <lightning-input data-recid={is.id} data-parent={res.id} type="number" name="numofhours" label="Hours" value={is.wh.numofhours} onchange={changeVal} step="0.25" required></lightning-input>
+                                                                        <lightning-textarea data-recid={is.id} data-parent={res.id} name="curtext" label="Description of work" value={is.wh.curtext} onchange={changeVal} required></lightning-textarea>
+                                                                        <template if:true={pm}>
+                                                                            <lightning-input data-recid={is.id} data-parent={res.id} type="checkbox" name="notbill" label="Not Billable" checked={is.wh.notbill} onchange={changeVal}></lightning-input>
+                                                                        </template>
+                                                                        <div class="centered"><lightning-button variant="brand" data-recid={is.id} data-project={is.projid} data-scope={is.scopeid} data-account={is.accid} data-status={is.status} data-parent={res.id} label="save" title="save" class="slds-m-left_x-small" onclick={saveWH}></lightning-button></div>
+                                                                    </form>
+                                                                </div>
+                                                                <div data-moredat={is.id} style="display:none;" class="minwidth">
+                                                                    <template for:each={is.adtfields} for:item="fld">
+                                                                        <template if:true={fld.value}>
+                                                                            <div key={fld.key}>
+                                                                                <b>{fld.label}:</b><br/>
+                                                                                <lightning-formatted-rich-text value={fld.value}></lightning-formatted-rich-text>
+                                                                            </div>
+                                                                        </template>
+                                                                    </template>
+                                                                </div>
+                                                                <div style="display:none;" data-url={is.url} data-chatter={is.id}>
+                                                                    <iframe class="chatterifr" data-chatterload={is.id}></iframe>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </template>
+                                            </template>
+                                        </template>
+                                        <div data-parent={res.id} data-bottom="true" data-pos="999999" class="column centered" draggable={admin} ondragstart={handleDragStart} ondragenter={handleDragEnter} ondragover={handleDragOver} ondragleave={handleDragLeave} ondrop={handleDrop}>
+                                            --bottom--
+                                        </div>
+                                        <template if:true={res.main}>
+                                            <br/>
+                                            <div class="centered toppad" style="background:lightcoral;"><b>Open Issues - Owned by me</b> ({res.numown})</div>
+                                            <template for:each={res.ownedissues} for:item="is">
+                                                <template if:true={is.okview}>
+                                                    <template if:false={is.isFiltered}>
+                                                        <div key={is.id} data-parent={res.id} data-recid={is.id} data-pos={is.queue} class={is.colclass}>
+                                                            <div style="white-space:nowrap;">
+                                                                <b>
+                                                                    <div style="display:inline-block;width:50%;">
+                                                                        <div style="display:inline-block;border-radius:5px;padding:5px;border:1px solid lightgray;" class={is.wh.boxstyle} title="In Work"></div>
+                                                                        <template if:false={is.issueminebol}>
+                                                                            <div style="display:inline-block;border-radius:5px;padding:5px;border:1px solid lightgray;" class={is.running}  title="Assigned to is working"></div>
+                                                                        </template>
+                                                                        &nbsp;<a data-recid={is.id} onclick={newWin}>{is.name}</a>
+                                                                    </div>
+                                                                    <div style="display:inline-block;text-align: right;width:50%;">
+                                                                        &nbsp;{is.wh.runtime}&nbsp;
+                                                                        <template if:false={is.noTimer}>
+                                                                            <a class={is.wh.playstyle} data-recid={is.id} data-ismine={is.issuemine} onclick={workPlay}>
+                                                                                <lightning-icon data-recid={is.id} data-ismine={is.issuemine} icon-name="utility:play" alternative-text="play" size="x-small"></lightning-icon>
+                                                                            </a>&nbsp;
+                                                                            <a class={is.wh.pausestyle} data-recid={is.id} data-ismine={is.issuemine} onclick={workPause}>
+                                                                                <lightning-icon data-recid={is.id} data-ismine={is.issuemine} icon-name="utility:pause" alternative-text="pause" size="x-small"></lightning-icon>
+                                                                            </a>&nbsp;
+                                                                            <a class={is.wh.playstyle} data-recid={is.id} data-ismine={is.issuemine} onclick={showEdtWH}>
+                                                                                <lightning-icon data-recid={is.id} data-ismine={is.issuemine} icon-name="utility:edit" alternative-text="edit" size="x-small"></lightning-icon>
+                                                                            </a>&nbsp;
+                                                                            <a data-recid={is.id} data-ismine={is.issuemine} onclick={workStop}>
+                                                                                <lightning-icon data-recid={is.id} data-ismine={is.issuemine} icon-name="utility:stop" alternative-text="stop" size="x-small"></lightning-icon>
+                                                                            </a>
+                                                                        </template>
+                                                                    </div>
+                                                                </b>
+                                                            </div>
+                                                            <lightning-input label="Mins" style="display:none;" data-isedt="true" data-recid={is.id} data-strt={is.id} type="number" name="worktime" value={is.wh.inputtime} step="0.01" onchange={edtWorkTime}></lightning-input>
+                                                            <div class="centered">
+                                                                <select class="slds-select" name={is.id} data-recid={is.id} data-hrs={is.totalhrs} slot="actions" size="1" onchange={changeStats}>
+                                                                    <template if:false={is.noTimer}>
+                                                                        <template for:each={is.statuses} for:item="op">
+                                                                            <option key={op.value} value={op.value} selected={op.sel}>{op.label}</option>
+                                                                        </template>
+                                                                    </template>
+                                                                    <template if:true={is.noTimer}>
+                                                                        <option disabled="true" value={is.status} selected>{is.status}</option>
+                                                                    </template>
+                                                                </select>
+                                                            </div>
+                                                            <template if:true={is.hasdelivery}>
+                                                                <div class="wb">Delivery Type: {is.delivery}</div>
+                                                            </template>
+                                                            <div class="wb">Name: {is.textname} <template if:true={is.isbug}><lightning-icon icon-name="utility:bug" alternative-text="bug" variant="error" size="xx-small"></lightning-icon></template></div>
+                                                            <div class="wb">Account: <a data-recid={is.accid} onclick={newWin}>{is.accname}</a></div>
+                                                            <div style="display:block;">
+                                                                <div style="display:inline-block;">Assigned To: {is.assigned}</div>
+                                                                <div style="float: right;"><a data-rid={is.id} onclick={newIssue}><lightning-icon data-rid={is.id} icon-name="utility:new" alternative-text="new" size="x-small"></lightning-icon></a>&nbsp;&nbsp;<a data-recid={is.id} onclick={editIssue}><lightning-icon data-recid={is.id} icon-name="utility:edit_form" alternative-text="edit issue" size="x-small"></lightning-icon></a>&nbsp;&nbsp;<a data-recid={is.id} onclick={toggleView}>Info</a></a></div>
+                                                            </div>
+                                                            <div style="display:none;" data-det={is.id}>
+                                                                <template if:true={is.projid}>
+                                                                    <div class="wb">Project: <a data-recid={is.projid} onclick={newWin}>{is.projname}</a></div>
+                                                                </template>
+                                                                <template if:true={is.scopeid}>
+                                                                    <div class="wb">Scope: <a data-recid={is.scopeid} onclick={newWin}>{is.scopename}</a></div>
+                                                                </template>
+                                                                <template if:true={is.relid}>
+                                                                    <div class="wb">Release: <a data-recid={is.relid} onclick={newWin}>{is.relname}</a></div>
+                                                                </template>
+                                                                <template if:true={is.parentid}>
+                                                                    <div class="wb">Correlated to Issue: <a data-recid={is.parentid} onclick={newWin}>{is.parentname}</a></div>
+                                                                </template>
+                                                                <div class="wb">Budget: {is.budget}</div>
+                                                                <template if:false={is.isest}>
+                                                                    <template if:true={is.hasest}>
+                                                                        <div class="wb">Dev Estimation: {is.devest}</div>
+                                                                    </template>
+                                                                </template>
+                                                                <div class="wb">Billable Hours: {is.billable}</div>
+                                                                <div class="wb">Due Date: <lightning-formatted-date-time value={is.dat} year="2-digit" month="2-digit" day="2-digit"></lightning-formatted-date-time></div>
+                                                                <template if:true={is.logid}>
+                                                                    <div class="wb">Work: <lightning-formatted-rich-text value={is.logurl}></lightning-formatted-rich-text> - <a data-recid={is.logid} onclick={newWin}>{is.logname}</a></div>
+                                                                </template>
+                                                                <template if:true={is.uatlogid}>
+                                                                    <div class="wb">UAT: <lightning-formatted-rich-text value={is.uatlogurl}></lightning-formatted-rich-text> - <a data-recid={is.uatlogid} onclick={newWin}>{is.uatlogname}</a></div>
+                                                                </template>
+                                                                <template if:true={is.deplogid}>
+                                                                    <div class="wb">Production: <lightning-formatted-rich-text value={is.deplogurl}></lightning-formatted-rich-text> - <a data-recid={is.deplogid} onclick={newWin}>{is.deplogname}</a></div>
+                                                                </template>
+                                                                <div class="toppad white">
+                                                                    <div style="display:block;">
+                                                                        <b>
+                                                                            <div class="third"><a data-more={is.id} onclick={moreDat}>Details</a></div>
+                                                                            <div class="third centered">
+                                                                                <a data-chat={is.id} onclick={showChatter}>
+                                                                                    <template if:true={is.chatterNotify}>
+                                                                                        <div style="display:inline-block;border-radius:5px;padding:5px;border:1px solid lightgray;background:red;"></div>&nbsp;
+                                                                                    </template>
+                                                                                    Files &amp; Chatter
+                                                                                </a>
+                                                                            </div>
+                                                                            <div style="float: right;"><a data-wh={is.id} onclick={newWH}>WH</a></div>
+                                                                        </b>
+                                                                    </div>
+                                                                    <div style="display:none;" data-newwh={is.id}>
+                                                                        <form data-formid={is.id}>
+                                                                            <lightning-input data-recid={is.id} data-parent={res.id} type="date" name="curdate" label="Date" value={is.wh.curdate} onchange={changeVal} required></lightning-input>
+                                                                            <lightning-input data-recid={is.id} data-parent={res.id} type="number" name="numofhours" label="Hours" value={is.wh.numofhours} onchange={changeVal} step="0.25" required></lightning-input>
+                                                                            <lightning-textarea data-recid={is.id} data-parent={res.id} name="curtext" label="Description of work" value={is.wh.curtext} onchange={changeVal} required></lightning-textarea>
+                                                                            <template if:true={pm}>
+                                                                                <lightning-input data-recid={is.id} data-parent={res.id} type="checkbox" name="notbill" label="Not Billable" checked={is.wh.notbill} onchange={changeVal}></lightning-input>
+                                                                            </template>
+                                                                            <div class="centered"><lightning-button variant="brand" data-recid={is.id} data-project={is.projid} data-scope={is.scopeid} data-account={is.accid} data-status={is.status} data-parent={res.id} label="save" title="save" class="slds-m-left_x-small" onclick={saveWH}></lightning-button></div>
+                                                                        </form>
+                                                                    </div>
+                                                                    <div data-moredat={is.id} style="display:none;" class="minwidth">
+                                                                        <template for:each={is.adtfields} for:item="fld">
+                                                                            <template if:true={fld.value}>
+                                                                                <div key={fld.key}>
+                                                                                    <b>{fld.label}:</b><br/>
+                                                                                    <lightning-formatted-rich-text value={fld.value}></lightning-formatted-rich-text>
+                                                                                </div>
+                                                                            </template>
+                                                                        </template>
+                                                                    </div>
+                                                                    <div style="display:none;" data-url={is.url} data-chatter={is.id}>
+                                                                        <iframe class="chatterifr" data-chatterload={is.id}></iframe>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </template>
+                                                </template>
+                                            </template>
+                                        </template>
+                                        <template if:true={res.numwait}>
+                                            <br/>
+                                            <div class="centered toppad" style="background:orange;">
+                                                <template if:true={res.waitingshow}>
+                                                    <a data-recid={res.id} onclick={toggleWait}><lightning-icon data-recid={res.id} icon-name="utility:chevronup" alternative-text="open" size="x-small"></lightning-icon></a>
+                                                </template>
+                                                <template if:false={res.waitingshow}>
+                                                    <a data-recid={res.id} onclick={toggleWait}><lightning-icon data-recid={res.id} icon-name="utility:chevrondown" alternative-text="open" size="x-small"></lightning-icon></a>
+                                                </template>
+                                                <b>Open Issues - Waiting for PM</b> ({res.numwait})
+                                            </div>
+                                            <template if:true={res.waitingshow}>
+                                                <template for:each={res.waitingissues} for:item="is">
+                                                    <template if:true={is.okview}>
+                                                        <template if:false={is.isFiltered}>
+                                                            <div key={is.id} data-parent={res.id} data-recid={is.id} data-pos={is.queue} class={is.colclass}>
+                                                                <div style="white-space:nowrap;">
+                                                                    <b>
+                                                                        <div style="display:inline-block;width:50%;">
+                                                                            <div style="display:inline-block;border-radius:5px;padding:5px;border:1px solid lightgray;" class={is.wh.boxstyle} title="In Work"></div>
+                                                                            <template if:false={is.issueminebol}>
+                                                                                <div style="display:inline-block;border-radius:5px;padding:5px;border:1px solid lightgray;" class={is.running}  title="Assigned to is working"></div>
+                                                                            </template>
+                                                                            &nbsp;<a data-recid={is.id} onclick={newWin}>{is.name}</a>
+                                                                        </div>
+                                                                        <div style="display:inline-block;text-align: right;width:50%;">
+                                                                            &nbsp;{is.wh.runtime}&nbsp;
+                                                                            <template if:false={is.noTimer}>
+                                                                                <a class={is.wh.playstyle} data-recid={is.id} data-ismine={is.issuemine} onclick={workPlay}>
+                                                                                    <lightning-icon data-recid={is.id} data-ismine={is.issuemine} icon-name="utility:play" alternative-text="play" size="x-small"></lightning-icon>
+                                                                                </a>&nbsp;
+                                                                                <a class={is.wh.pausestyle} data-recid={is.id} data-ismine={is.issuemine} onclick={workPause}>
+                                                                                    <lightning-icon data-recid={is.id} data-ismine={is.issuemine} icon-name="utility:pause" alternative-text="pause" size="x-small"></lightning-icon>
+                                                                                </a>&nbsp;
+                                                                                <a class={is.wh.playstyle} data-recid={is.id} data-ismine={is.issuemine} onclick={showEdtWH}>
+                                                                                    <lightning-icon data-recid={is.id} data-ismine={is.issuemine} icon-name="utility:edit" alternative-text="edit" size="x-small"></lightning-icon>
+                                                                                </a>&nbsp;
+                                                                                <a data-recid={is.id} data-ismine={is.issuemine} onclick={workStop}>
+                                                                                    <lightning-icon data-recid={is.id} data-ismine={is.issuemine} icon-name="utility:stop" alternative-text="stop" size="x-small"></lightning-icon>
+                                                                                </a>
+                                                                            </template>
+                                                                        </div>
+                                                                    </b>
+                                                                </div>
+                                                                <lightning-input label="Mins" style="display:none;" data-isedt="true" data-recid={is.id} data-strt={is.id} type="number" name="worktime" value={is.wh.inputtime} step="0.01" onchange={edtWorkTime}></lightning-input>
+                                                                <div class="centered">
+                                                                    <select class="slds-select" name={is.id} data-recid={is.id} data-hrs={is.totalhrs} slot="actions" size="1" onchange={changeStats}>
+                                                                        <template if:false={is.noTimer}>
+                                                                            <template for:each={is.statuses} for:item="op">
+                                                                                <option key={op.value} value={op.value} selected={op.sel}>{op.label}</option>
+                                                                            </template>
+                                                                        </template>
+                                                                        <template if:true={is.noTimer}>
+                                                                            <option disabled="true" value={is.status} selected>{is.status}</option>
+                                                                        </template>
+                                                                    </select>
+                                                                </div>
+                                                                <template if:true={is.hasdelivery}>
+                                                                    <div class="wb">Delivery Type: {is.delivery}</div>
+                                                                </template>
+                                                                <div class="wb">Name: {is.textname} <template if:true={is.isbug}><lightning-icon icon-name="utility:bug" alternative-text="bug" variant="error" size="xx-small"></lightning-icon></template></div>
+                                                                <div class="wb">Account: <a data-recid={is.accid} onclick={newWin}>{is.accname}</a></div>
+                                                                <div style="display:block;">
+                                                                    <div style="display:inline-block;">Owner: {is.ownername}</div>
+                                                                    <div style="float: right;"><a data-rid={is.id} onclick={newIssue}><lightning-icon data-rid={is.id} icon-name="utility:new" alternative-text="new" size="x-small"></lightning-icon></a>&nbsp;&nbsp;<a data-recid={is.id} onclick={editIssue}><lightning-icon data-recid={is.id} icon-name="utility:edit_form" alternative-text="edit issue" size="x-small"></lightning-icon></a>&nbsp;&nbsp;<a data-recid={is.id} onclick={toggleView}>Info</a></a></div>
+                                                                </div>
+                                                                <div style="display:none;" data-det={is.id}>
+                                                                    <template if:true={is.projid}>
+                                                                        <div class="wb">Project: <a data-recid={is.projid} onclick={newWin}>{is.projname}</a></div>
+                                                                    </template>
+                                                                    <template if:true={is.scopeid}>
+                                                                        <div class="wb">Scope: <a data-recid={is.scopeid} onclick={newWin}>{is.scopename}</a></div>
+                                                                    </template>
+                                                                    <template if:true={is.relid}>
+                                                                        <div class="wb">Release: <a data-recid={is.relid} onclick={newWin}>{is.relname}</a></div>
+                                                                    </template>
+                                                                    <template if:true={is.parentid}>
+                                                                        <div class="wb">Correlated to Issue: <a data-recid={is.parentid} onclick={newWin}>{is.parentname}</a></div>
+                                                                    </template>
+                                                                    <div class="wb">Budget: {is.budget}</div>
+                                                                    <template if:false={is.isest}>
+                                                                        <template if:true={is.hasest}>
+                                                                            <div class="wb">Dev Estimation: {is.devest}</div>
+                                                                        </template>
+                                                                    </template>
+                                                                    <div class="wb">Billable Hours: {is.billable}</div>
+                                                                    <div class="wb">Due Date: <lightning-formatted-date-time value={is.dat} year="2-digit" month="2-digit" day="2-digit"></lightning-formatted-date-time></div>
+                                                                    <template if:true={is.logid}>
+                                                                        <div class="wb">Work: <lightning-formatted-rich-text value={is.logurl}></lightning-formatted-rich-text> - <a data-recid={is.logid} onclick={newWin}>{is.logname}</a></div>
+                                                                    </template>
+                                                                    <template if:true={is.uatlogid}>
+                                                                        <div class="wb">UAT: <lightning-formatted-rich-text value={is.uatlogurl}></lightning-formatted-rich-text> - <a data-recid={is.uatlogid} onclick={newWin}>{is.uatlogname}</a></div>
+                                                                    </template>
+                                                                    <template if:true={is.deplogid}>
+                                                                        <div class="wb">Production: <lightning-formatted-rich-text value={is.deplogurl}></lightning-formatted-rich-text> - <a data-recid={is.deplogid} onclick={newWin}>{is.deplogname}</a></div>
+                                                                    </template>
+                                                                    <div class="toppad white">
+                                                                        <div style="display:block;">
+                                                                            <b>
+                                                                                <div class="third"><a data-more={is.id} onclick={moreDat}>Details</a></div>
+                                                                                <div class="third centered">
+                                                                                    <a data-chat={is.id} onclick={showChatter}>
+                                                                                        <template if:true={is.chatterNotify}>
+                                                                                            <div style="display:inline-block;border-radius:5px;padding:5px;border:1px solid lightgray;background:red;"></div>&nbsp;
+                                                                                        </template>
+                                                                                        Files &amp; Chatter
+                                                                                    </a>
+                                                                                </div>
+                                                                                <div style="float: right;"><a data-wh={is.id} onclick={newWH}>WH</a></div>
+                                                                            </b>
+                                                                        </div>
+                                                                        <div style="display:none;" data-newwh={is.id}>
+                                                                            <form data-formid={is.id}>
+                                                                                <lightning-input data-recid={is.id} data-parent={res.id} type="date" name="curdate" label="Date" value={is.wh.curdate} onchange={changeVal} required></lightning-input>
+                                                                                <lightning-input data-recid={is.id} data-parent={res.id} type="number" name="numofhours" label="Hours" value={is.wh.numofhours} onchange={changeVal} step="0.25" required></lightning-input>
+                                                                                <lightning-textarea data-recid={is.id} data-parent={res.id} name="curtext" label="Description of work" value={is.wh.curtext} onchange={changeVal} required></lightning-textarea>
+                                                                                <template if:true={pm}>
+                                                                                    <lightning-input data-recid={is.id} data-parent={res.id} type="checkbox" name="notbill" label="Not Billable" checked={is.wh.notbill} onchange={changeVal}></lightning-input>
+                                                                                </template>
+                                                                                <div class="centered"><lightning-button variant="brand" data-recid={is.id} data-project={is.projid} data-scope={is.scopeid} data-account={is.accid} data-status={is.status} data-parent={res.id} label="save" title="save" class="slds-m-left_x-small" onclick={saveWH}></lightning-button></div>
+                                                                            </form>
+                                                                        </div>
+                                                                        <div data-moredat={is.id} style="display:none;" class="minwidth">
+                                                                            <template for:each={is.adtfields} for:item="fld">
+                                                                                <template if:true={fld.value}>
+                                                                                    <div key={fld.key}>
+                                                                                        <b>{fld.label}:</b><br/>
+                                                                                        <lightning-formatted-rich-text value={fld.value}></lightning-formatted-rich-text>
+                                                                                    </div>
+                                                                                </template>
+                                                                            </template>
+                                                                        </div>
+                                                                        <div style="display:none;" data-url={is.url} data-chatter={is.id}>
+                                                                            <iframe class="chatterifr" data-chatterload={is.id}></iframe>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </template>
+                                                    </template>
+                                                </template>
+                                            </template>
+                                        </template>
+                                    </div>
+                                </template>
+                            </template>
+                        </template>
+                    </div>
+                </div>
+            </lightning-card>
+        </div>
+    </div>
+</template>

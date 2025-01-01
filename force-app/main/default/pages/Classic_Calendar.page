@@ -1,0 +1,5 @@
+<apex:page showHeader="false" sidebar="false">
+    <script>
+        window.open("/00U/c?cType=2&md2=8&md0=2019");
+    </script>
+</apex:page>

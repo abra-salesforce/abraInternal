@@ -1,0 +1,33 @@
+<apex:page showHeader="false" sidebar="false" cache="false" docType="html-5.0">
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0"></meta>
+        <style>
+            .container{
+                display: block;
+                overflow: auto;
+            }
+            @media only screen and (max-width: 600px) {
+                .container{
+                    display: block;
+                    overflow: auto;
+                    font-size: small !important;
+                }
+            }
+        </style>
+    </head>
+    <apex:includeLightning />
+    <div id="container" class="container">
+    </div>
+    <script>
+        var url_string = window.location.href;
+        var url = new URL(url_string);
+        var recid = url.searchParams.get("id");
+        $Lightning.use("c:chatterlwc", function () {
+            $Lightning.createComponent("c:chatterlwcrec", {
+                'strid': recid
+                }, "container",
+                function (cmp) {
+                });
+        });
+    </script>
+</apex:page>
