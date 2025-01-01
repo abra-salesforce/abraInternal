@@ -57,7 +57,7 @@ global class BillingAccountQueueable implements Queueable, Database.AllowsCallou
                         }
                     }
                     
-                    record.LastSyncTime__c = Datetime.now();
+                record.LastSyncTime__c = Datetime.now();
                     /*record.Account__c = crmId;
                     if (data.containsKey('ViewKey')) {
                         record.Billing_Account_Unique_Key__c = (String) data.get('ViewKey');
@@ -99,7 +99,7 @@ global class BillingAccountQueueable implements Queueable, Database.AllowsCallou
             if (response.getStatusCode() == 200) {
                 return (List<Object>) JSON.deserializeUntyped(response.getBody());
             } else {
-                createLog('API Call Failure', 'API call failed with status code: ' + response.getStatusCode(), 'Inbound', response.getBody());
+                createLog('API Call Failure', 'API call failed with status code: ' + response.getStatusCode(), 'Inbound',null);
             }
         } catch (Exception ex) {
             createLog('API Call Exception', ex.getMessage(), 'Inbound', null);
@@ -108,12 +108,7 @@ global class BillingAccountQueueable implements Queueable, Database.AllowsCallou
     }
     
     private void upsertRecords(List<Billing_Account__c> records) {
-        for (Billing_Account__c record : records) {
-            if (record.Json__c != null && record.Json__c.length() > 131072) {
-                record.Json__c = record.Json__c.substring(0, 131072); // Truncate to avoid STRING_TOO_LONG error
-            }
-        }
-    
+        List<Billing_Account__c> failedRecords = new List<Billing_Account__c>();
         try {
             Database.UpsertResult[] results = Database.upsert(records, Billing_Account__c.fields.Billing_Account_Unique_Key__c, false);
             for (Integer i = 0; i < results.size(); i++) {
@@ -122,26 +117,27 @@ global class BillingAccountQueueable implements Queueable, Database.AllowsCallou
                 }
             }
         } catch (Exception ex) {
-            createLog('DML Exception', ex.getMessage(), 'Inbound', JSON.serialize(records));
+            // createLog('DML Exception', ex.getMessage(), 'Inbound', JSON.serialize(records));
             return;
+        }
+        
+        if (!failedRecords.isEmpty()) {
+            createLog('DML Failure', 'One or more records failed during upsert operation.', 'Inbound', JSON.serialize(failedRecords));
         }
     }
     
-    
     private void createLog(String errorType, String errorMessage, String direction, String jsonData) {
+        String truncatedJson = jsonData;
+        if (jsonData != null && jsonData.length() > 255) {
+            truncatedJson = jsonData.substring(0, 252) + '...';
+        }
+        
         Log__c log = new Log__c();
         log.Error__c = errorType + ': ' + errorMessage;
         log.Direction__c = direction;
-    
-        if (jsonData != null && jsonData.length() > 131072) { 
-            log.Json__c = jsonData.substring(0, 131072); 
-        } else {
-            log.Json__c = jsonData;
-        }
-    
+        log.Json__c = truncatedJson;
         insert log;
     }
-    
     
     private Map<String, Map<String, String>> getFieldMappings() {
         Map<String, Map<String, String>> fieldMappings = new Map<String, Map<String, String>>();
