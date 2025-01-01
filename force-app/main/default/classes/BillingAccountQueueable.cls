@@ -76,7 +76,7 @@ global class BillingAccountQueueable implements Queueable, Database.AllowsCallou
 
             // Create a log if there are invalid rows
             if (!invalidRows.isEmpty()) {
-                createLog('Invalid Data in API Response', null, 'Outbound', JSON.serialize(invalidRows));
+                createLog('Invalid Data in API Response', '', 'Outbound', JSON.serialize(invalidRows));
             }
 
             // Upsert the current batch
