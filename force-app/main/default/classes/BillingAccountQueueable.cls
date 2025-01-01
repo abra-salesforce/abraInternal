@@ -108,7 +108,12 @@ global class BillingAccountQueueable implements Queueable, Database.AllowsCallou
     }
     
     private void upsertRecords(List<Billing_Account__c> records) {
-        List<Billing_Account__c> failedRecords = new List<Billing_Account__c>();
+        for (Billing_Account__c record : records) {
+            if (record.Json__c != null && record.Json__c.length() > 131072) {
+                record.Json__c = record.Json__c.substring(0, 131072); // Truncate to avoid STRING_TOO_LONG error
+            }
+        }
+    
         try {
             Database.UpsertResult[] results = Database.upsert(records, Billing_Account__c.fields.Billing_Account_Unique_Key__c, false);
             for (Integer i = 0; i < results.size(); i++) {
@@ -120,19 +125,23 @@ global class BillingAccountQueueable implements Queueable, Database.AllowsCallou
             createLog('DML Exception', ex.getMessage(), 'Inbound', JSON.serialize(records));
             return;
         }
-        
-        if (!failedRecords.isEmpty()) {
-            createLog('DML Failure', 'One or more records failed during upsert operation.', 'Inbound', JSON.serialize(failedRecords));
-        }
     }
+    
     
     private void createLog(String errorType, String errorMessage, String direction, String jsonData) {
         Log__c log = new Log__c();
         log.Error__c = errorType + ': ' + errorMessage;
         log.Direction__c = direction;
-        log.Json__c = jsonData;
+    
+        if (jsonData != null && jsonData.length() > 131072) { 
+            log.Json__c = jsonData.substring(0, 131072); 
+        } else {
+            log.Json__c = jsonData;
+        }
+    
         insert log;
     }
+    
     
     private Map<String, Map<String, String>> getFieldMappings() {
         Map<String, Map<String, String>> fieldMappings = new Map<String, Map<String, String>>();
