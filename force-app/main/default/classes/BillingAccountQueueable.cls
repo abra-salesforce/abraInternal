@@ -20,7 +20,7 @@ global class BillingAccountQueueable implements Queueable, Database.AllowsCallou
                 Nav_Setting__mdt settings = getSettings();
                 apiResponse = callApi(settings);
                 if (apiResponse.isEmpty()) {
-                    System.debug('No data retrieved from API.');
+                    createLog('API response is empty', 'No data retrieved from API.', 'Outbound', null);
                     return;
                 }
             }
@@ -31,6 +31,7 @@ global class BillingAccountQueueable implements Queueable, Database.AllowsCallou
             System.debug('Processing records from index ' + startIndex + ' to ' + (endIndex - 1));
 
             List<Billing_Account__c> recordsToUpsert = new List<Billing_Account__c>();
+            List<Map<String, Object>> invalidRows = new List<Map<String, Object>>();
 
             // Retrieve field mappings
             Map<String, Map<String, String>> fieldMappings = getFieldMappings();
@@ -41,6 +42,7 @@ global class BillingAccountQueueable implements Queueable, Database.AllowsCallou
                     String crmId = (String) data.get('CRMID');
                     if (String.isEmpty(crmId) || !crmId.startsWith('001') || crmId.length() != 18) {
                         System.debug('Skipping record due to invalid CRMID: ' + data);
+                        invalidRows.add(data); // Add invalid row to the list
                         continue;
                     }
 
@@ -68,12 +70,22 @@ global class BillingAccountQueueable implements Queueable, Database.AllowsCallou
                     recordsToUpsert.add(record);
                 } catch (Exception ex) {
                     System.debug('Error processing record: ' + ex.getMessage());
+                    invalidRows.add(data); // Add invalid row to the list
                 }
+            }
+
+            // Create a log if there are invalid rows
+            if (!invalidRows.isEmpty()) {
+                createLog('Invalid Data in API Response', JSON.serialize(invalidRows), 'Outbound', null);
             }
 
             // Upsert the current batch
             if (!recordsToUpsert.isEmpty()) {
-                upsertRecords(recordsToUpsert);
+                try {
+                    upsertRecords(recordsToUpsert);
+                } catch (Exception ex) {
+                    createLog('DML Failure', ex.getMessage(), 'Outbound', JSON.serialize(recordsToUpsert));
+                }
             }
 
             // Enqueue the next batch if there are more records
@@ -102,26 +114,29 @@ global class BillingAccountQueueable implements Queueable, Database.AllowsCallou
             if (response.getStatusCode() == 200) {
                 return (List<Object>) JSON.deserializeUntyped(response.getBody());
             } else {
-                System.debug('API call failed with status code: ' + response.getStatusCode());
+                createLog('API Call Failure', 'API call failed with status code: ' + response.getStatusCode(), 'Outbound', response.getBody());
             }
         } catch (Exception ex) {
-            System.debug('Error during API call: ' + ex.getMessage());
+            createLog('API Call Exception', ex.getMessage(), 'Outbound', null);
         }
         return new List<Object>();
     }
 
     private void upsertRecords(List<Billing_Account__c> records) {
-        try {
-            Database.UpsertResult[] results = Database.upsert(records, Billing_Account__c.fields.Billing_Account_Unique_Key__c, false);
-            for (Database.UpsertResult result : results) {
-                if (!result.isSuccess()) {
-                    System.debug('Failed to upsert record: ' + result.getErrors()[0].getMessage());
-                }
+        Database.UpsertResult[] results = Database.upsert(records, Billing_Account__c.fields.Billing_Account_Unique_Key__c, false);
+        for (Database.UpsertResult result : results) {
+            if (!result.isSuccess()) {
+                createLog('DML Failure', result.getErrors()[0].getMessage(), 'Outbound', JSON.serialize(records));
             }
-            System.debug('Successfully upserted ' + records.size() + ' records.');
-        } catch (Exception ex) {
-            System.debug('Error during upsert: ' + ex.getMessage());
         }
+    }
+
+    private void createLog(String errorType, String errorMessage, String direction, String jsonData) {
+        Log__c log = new Log__c();
+        log.Error__c = errorType + ': ' + errorMessage;
+        log.Direction__c = direction;
+        log.Json__c = jsonData;
+        insert log;
     }
 
     private Map<String, Map<String, String>> getFieldMappings() {
