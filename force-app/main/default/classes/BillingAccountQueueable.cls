@@ -37,6 +37,13 @@ global class BillingAccountQueueable implements Queueable, Database.AllowsCallou
                 Map<String, Object> data = (Map<String, Object>) apiResponse[i];
                 try {
                     String crmId = (String) data.get('CRMID');
+                    String viewKey = (String) data.get('ViewKey');
+                    
+                    if (String.isBlank(viewKey)) {
+                        invalidRows.add(data);
+                        continue;
+                    }
+                    
                     if (String.isEmpty(crmId) || !crmId.startsWith('001') || crmId.length() != 18) {
                         invalidRows.add(data);
                         continue;
@@ -59,11 +66,11 @@ global class BillingAccountQueueable implements Queueable, Database.AllowsCallou
                     
                     record.LastSyncTime__c = Datetime.now();
                     record.Account__c = crmId;
-                    if (data.containsKey('ViewKey')) {
-                        record.Billing_Account_Unique_Key__c = (String) data.get('ViewKey');
-                    }
+                    record.Billing_Account_Unique_Key__c = (String) data.get('ViewKey');
                     
                     recordsToUpsert.add(record);
+
+
                 } catch (Exception ex) {
                     invalidRows.add(data);
                     
