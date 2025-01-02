@@ -69,8 +69,8 @@ global class BillingAccountQueueable implements Queueable, Database.AllowsCallou
                     record.Billing_Account_Unique_Key__c = (String) data.get('ViewKey');
                     
                     recordsToUpsert.add(record);
-
-
+                    
+                    
                 } catch (Exception ex) {
                     invalidRows.add(data);
                     
@@ -80,10 +80,12 @@ global class BillingAccountQueueable implements Queueable, Database.AllowsCallou
             if (!invalidRows.isEmpty()) {
                 system.debug('invalidRows: ' + invalidRows.size());
                 system.debug('invalid rows:'+ JSON.serialize(invalidRows));
-                createLog('Invalid Data in API Response', '', 'Inbound', JSON.serialize(invalidRows));
+                createLog('Invalid Data in API Response', '', 'Inbound', JSON.serializePretty(invalidRows));
             }
             
             if (!recordsToUpsert.isEmpty()) {
+                system.debug('recordsToUpsert: ' + JSON.serialize(recordsToUpsert));
+                
                 upsertRecords(recordsToUpsert);
             }
             
@@ -120,36 +122,44 @@ global class BillingAccountQueueable implements Queueable, Database.AllowsCallou
     private void upsertRecords(List<Billing_Account__c> records) {
         List<Billing_Account__c> failedRecords = new List<Billing_Account__c>();
         String errorDetails = ''; // Initialize as an empty string
+        List<Billing_Account__c> filteredRecords = new List<Billing_Account__c>();
+        for (Billing_Account__c record : records) {
+            if (!String.isBlank(record.Billing_Account_Unique_Key__c)) {
+                filteredRecords.add(record);
+            } else {
+                System.debug('Skipping record with blank Billing_Account_Unique_Key__c: ' + JSON.serializePretty(record));
+            }
+        }
         
-        try {
-            Database.UpsertResult[] results = Database.upsert(records, Billing_Account__c.fields.Billing_Account_Unique_Key__c, false);
-            for (Integer i = 0; i < results.size(); i++) {
-                if (!results[i].isSuccess()) {
-                    failedRecords.add(records[i]);
-                    for (Database.Error error : results[i].getErrors()) {
-                        errorDetails += 'Record ID: ' + (records[i].Id != null ? records[i].Id : 'N/A') + ' - ';
-                        errorDetails += 'Error Message: ' + error.getMessage() + '. ';
-                        errorDetails += 'Status Code: ' + error.getStatusCode() + '. ';
-                        if (error.getFields() != null && !error.getFields().isEmpty()) {
-                            errorDetails += 'Fields: ' + String.join(error.getFields(), ', ') + '. ';
+        System.debug('Filtered records for upsert: ' + JSON.serializePretty(filteredRecords));
+        if (!filteredRecords.isEmpty()) {
+            try {
+                Database.UpsertResult[] results = Database.upsert(
+                    filteredRecords,
+                Billing_Account__c.fields.Billing_Account_Unique_Key__c,
+                false
+                    );
+                
+                // Handle results
+                for (Integer i = 0; i < results.size(); i++) {
+                    if (!results[i].isSuccess()) {
+                        for (Database.Error error : results[i].getErrors()) {
+                            System.debug('Failed Record: ' + JSON.serializePretty(filteredRecords[i]) + ', Error: ' + error.getMessage());
                         }
-                        errorDetails += '\n';
                     }
                 }
+            } catch (Exception ex) {
+                System.debug('DML Exception: ' + ex.getMessage());
+                createLog('DML Exception', ex.getMessage(), 'Inbound', null);
             }
-        } catch (Exception ex) {
-            errorDetails = 'DML Exception: ' + ex.getMessage() + '\n' +
-                'Cause: ' + (ex.getCause() != null ? ex.getCause().getMessage() : 'None') + '\n' +
-                'Stack Trace: ' + ex.getStackTraceString() + '\n';
-            
-            createLog('DML Exception', errorDetails, 'Inbound', null);
-            return;
+        } else {
+            System.debug('No valid records to upsert.');
         }
-        
         if (!failedRecords.isEmpty()) {
-            createLog('DML Failure', errorDetails, 'Inbound', JSON.serialize(failedRecords));
+            createLog('DML Failure', errorDetails, 'Inbound', JSON.serializePretty(failedRecords));
         }
     }
+    
     
     
     private void createLog(String errorType, String errorMessage, String direction, String jsonData) {
