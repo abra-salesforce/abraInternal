@@ -66,10 +66,12 @@ global class BillingAccountQueueable implements Queueable, Database.AllowsCallou
                     recordsToUpsert.add(record);
                 } catch (Exception ex) {
                     invalidRows.add(data);
+                   
                 }
             }
             
             if (!invalidRows.isEmpty()) {
+                system.debug('invalidRows: ' + invalidRows.size());
                 createLog('Invalid Data in API Response', '', 'Inbound', JSON.serialize(invalidRows));
             }
             
@@ -144,6 +146,8 @@ global class BillingAccountQueueable implements Queueable, Database.AllowsCallou
             truncatedJson = jsonData.substring(0, 131000) + '...';
         }
         String truncatedErrorMessage = errorMessage;
+        system.debug('truncatedJson length: ' + truncatedJson.length());
+        system.debug('truncatedErrorMessage length: ' + truncatedErrorMessage.length());
         if(errorMessage != null && errorMessage.length() > 131072){
             truncatedErrorMessage = errorMessage.substring(0, 131000)+'...'; ///;
         }
