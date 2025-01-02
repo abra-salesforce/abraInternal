@@ -3,6 +3,7 @@ global class BillingAccountQueueable implements Queueable, Database.AllowsCallou
     private List<Object> apiResponse;
     private Map<String, Map<String, String>> fieldMappings;
     private Integer startIndex;
+    String errorMessage = '';
     
     public BillingAccountQueueable() {
         this.apiResponse = new List<Object>();
@@ -13,6 +14,7 @@ global class BillingAccountQueueable implements Queueable, Database.AllowsCallou
         this.apiResponse = apiResponse;
         this.startIndex = startIndex;
         this.fieldMappings = fieldMappings;
+        this.errorMessage = '';
     }
     
     global void execute(QueueableContext context) {
@@ -40,12 +42,15 @@ global class BillingAccountQueueable implements Queueable, Database.AllowsCallou
                     String viewKey = (String) data.get('ViewKey');
                     
                     if (String.isBlank(viewKey)) {
+                        errorMessage += 'Record skipped: ViewKey is empty or invalid. Record Data: ' + JSON.serializePretty(data.get('ViewKey')) + '\n';
+
                         invalidRows.add(data);
                         continue;
                     }
                     
                     if (String.isEmpty(crmId) || !crmId.startsWith('001') || crmId.length() != 18) {
                         invalidRows.add(data);
+                        errorMessage += 'Record skipped: CRMID is empty or invalid. Record Data: ' + JSON.serializePretty(data.get('CRMID')) + '\n';
                         continue;
                     }
                     
@@ -80,6 +85,7 @@ global class BillingAccountQueueable implements Queueable, Database.AllowsCallou
             if (!invalidRows.isEmpty()) {
                 system.debug('invalidRows: ' + invalidRows.size());
                 system.debug('invalid rows:'+ JSON.serialize(invalidRows));
+
                 createLog('Invalid Data in API Response', '', 'Inbound', JSON.serializePretty(invalidRows));
             }
             
@@ -144,6 +150,8 @@ global class BillingAccountQueueable implements Queueable, Database.AllowsCallou
                 for (Integer i = 0; i < results.size(); i++) {
                     if (!results[i].isSuccess()) {
                         for (Database.Error error : results[i].getErrors()) {
+                            failedRecords.add(filteredRecords[i]);
+                            errorDetails += 'Failed Record: ' + JSON.serializePretty(filteredRecords[i].Billing_Account_Unique_Key__c) + ', Error: ' + error.getMessage() + '\n';
                             System.debug('Failed Record: ' + JSON.serializePretty(filteredRecords[i]) + ', Error: ' + error.getMessage());
                         }
                     }
