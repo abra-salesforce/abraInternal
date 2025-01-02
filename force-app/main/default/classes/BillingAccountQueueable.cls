@@ -40,9 +40,10 @@ global class BillingAccountQueueable implements Queueable, Database.AllowsCallou
                 try {
                     String crmId = (String) data.get('CRMID');
                     String viewKey = (String) data.get('ViewKey');
-                    
+                    System.debug('Processing record: CRMID=' + crmId + ', ViewKey=' + viewKey);
+
                     if (String.isBlank(viewKey)) {
-                        errorMessage += 'Record skipped: ViewKey is empty or invalid. Record Data: ' + viewKey + '\n';
+                        errorMessage += 'Record skipped: CRMID is empty or invalid. Actual Value: ' + crmId + '\n';
 
                         invalidRows.add(data);
                         continue;
@@ -78,7 +79,8 @@ global class BillingAccountQueueable implements Queueable, Database.AllowsCallou
                     
                 } catch (Exception ex) {
                     invalidRows.add(data);
-                    
+                    errorMessage += 'Error processing record: CRMID=' + data.get('CRMID') + ', ViewKey=' + data.get('ViewKey') + ', Error=' + ex.getMessage() + '\n';
+
                 }
             }
             
