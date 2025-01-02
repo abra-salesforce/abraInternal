@@ -42,15 +42,15 @@ global class BillingAccountQueueable implements Queueable, Database.AllowsCallou
                     String viewKey = (String) data.get('ViewKey');
                     
                     if (String.isBlank(viewKey)) {
-                        errorMessage += 'Record skipped: ViewKey is empty or invalid. Record Data: ' + JSON.serializePretty(data) + '\n';
-
+                        errorMessage += 'Record skipped: ViewKey is empty or invalid. Record Data: '+'\n';
+                        
                         invalidRows.add(data);
                         continue;
                     }
                     
                     if (String.isEmpty(crmId) || !crmId.startsWith('001') || crmId.length() != 18) {
-                        errorMessage += 'Record skipped: crmId is empty or invalid. Record Data: ' + JSON.serializePretty(data) + '\n';
-
+                        errorMessage += 'Record skipped: crmId is empty or invalid. Record Data: ' +'\n';
+                        
                         invalidRows.add(data);
                         continue;
                     }
@@ -86,7 +86,7 @@ global class BillingAccountQueueable implements Queueable, Database.AllowsCallou
             if (!invalidRows.isEmpty()) {
                 system.debug('invalidRows: ' + invalidRows.size());
                 system.debug('invalid rows:'+ JSON.serialize(invalidRows));
-
+                
                 createLog('Invalid Data in API Response', errorMessage, 'Inbound', JSON.serializePretty(invalidRows));
             }
             
