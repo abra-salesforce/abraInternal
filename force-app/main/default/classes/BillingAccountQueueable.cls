@@ -57,11 +57,11 @@ global class BillingAccountQueueable implements Queueable, Database.AllowsCallou
                         }
                     }
                     
-                record.LastSyncTime__c = Datetime.now();
-                    // record.Account__c = crmId;
-                    // if (data.containsKey('ViewKey')) {
-                    //     record.Billing_Account_Unique_Key__c = (String) data.get('ViewKey');
-                    // }
+                    record.LastSyncTime__c = Datetime.now();
+                    record.Account__c = crmId;
+                    if (data.containsKey('ViewKey')) {
+                        record.Billing_Account_Unique_Key__c = (String) data.get('ViewKey');
+                    }
                     
                     recordsToUpsert.add(record);
                 } catch (Exception ex) {
@@ -110,7 +110,7 @@ global class BillingAccountQueueable implements Queueable, Database.AllowsCallou
     private void upsertRecords(List<Billing_Account__c> records) {
         List<Billing_Account__c> failedRecords = new List<Billing_Account__c>();
         String errorDetails = ''; // Initialize as an empty string
-    
+        
         try {
             Database.UpsertResult[] results = Database.upsert(records, Billing_Account__c.fields.Billing_Account_Unique_Key__c, false);
             for (Integer i = 0; i < results.size(); i++) {
@@ -140,12 +140,16 @@ global class BillingAccountQueueable implements Queueable, Database.AllowsCallou
     
     private void createLog(String errorType, String errorMessage, String direction, String jsonData) {
         String truncatedJson = jsonData;
-        if (jsonData != null && jsonData.length() > 255) {
-            truncatedJson = jsonData.substring(0, 252) + '...';
+        if (jsonData != null && jsonData.length() > 131072) {
+            truncatedJson = jsonData.substring(0, 131000) + '...';
+        }
+        String truncatedErrorMessage = errorMessage;
+        if(errorMessage != null && errorMessage.length() > 131072){
+            truncatedErrorMessage = errorMessage.substring(0, 131000)+'...'; ///;
         }
         
         Log__c log = new Log__c();
-        log.Error__c = errorType + ': ' + errorMessage;
+        log.Error__c = errorType + ': ' + truncatedErrorMessage;
         log.Direction__c = direction;
         log.Json__c = truncatedJson;
         insert log;
