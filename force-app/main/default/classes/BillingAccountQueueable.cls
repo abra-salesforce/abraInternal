@@ -58,10 +58,10 @@ global class BillingAccountQueueable implements Queueable, Database.AllowsCallou
                     }
                     
                 record.LastSyncTime__c = Datetime.now();
-                    /*record.Account__c = crmId;
-                    if (data.containsKey('ViewKey')) {
-                        record.Billing_Account_Unique_Key__c = (String) data.get('ViewKey');
-                    }*/
+                    // record.Account__c = crmId;
+                    // if (data.containsKey('ViewKey')) {
+                    //     record.Billing_Account_Unique_Key__c = (String) data.get('ViewKey');
+                    // }
                     
                     recordsToUpsert.add(record);
                 } catch (Exception ex) {
