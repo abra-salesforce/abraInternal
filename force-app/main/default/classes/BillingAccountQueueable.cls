@@ -66,12 +66,13 @@ global class BillingAccountQueueable implements Queueable, Database.AllowsCallou
                     recordsToUpsert.add(record);
                 } catch (Exception ex) {
                     invalidRows.add(data);
-                   
+                    
                 }
             }
             
             if (!invalidRows.isEmpty()) {
                 system.debug('invalidRows: ' + invalidRows.size());
+                system.debug('invalid rows:'+ JSON.serialize(invalidRows));
                 createLog('Invalid Data in API Response', '', 'Inbound', JSON.serialize(invalidRows));
             }
             
@@ -130,7 +131,11 @@ global class BillingAccountQueueable implements Queueable, Database.AllowsCallou
                 }
             }
         } catch (Exception ex) {
-            createLog('DML Exception', ex.getMessage(), 'Inbound', JSON.serialize(records));
+            errorDetails = 'DML Exception: ' + ex.getMessage() + '\n' +
+                'Cause: ' + (ex.getCause() != null ? ex.getCause().getMessage() : 'None') + '\n' +
+                'Stack Trace: ' + ex.getStackTraceString() + '\n';
+            
+            createLog('DML Exception', errorDetails, 'Inbound', null);
             return;
         }
         
@@ -141,23 +146,39 @@ global class BillingAccountQueueable implements Queueable, Database.AllowsCallou
     
     
     private void createLog(String errorType, String errorMessage, String direction, String jsonData) {
-        String truncatedJson = jsonData;
-        if (jsonData != null && jsonData.length() > 131072) {
-            truncatedJson = jsonData.substring(0, 131000) + '...';
-        }
-        String truncatedErrorMessage = errorMessage;
-        system.debug('truncatedJson length: ' + truncatedJson.length());
-        system.debug('truncatedErrorMessage length: ' + truncatedErrorMessage.length());
-        if(errorMessage != null && errorMessage.length() > 131072){
-            truncatedErrorMessage = errorMessage.substring(0, 131000)+'...'; ///;
-        }
+        // Salesforce long text area fields allow up to 131,072 characters. Adjust to fit within a safe margin.
+        Integer maxFieldLength = 130000;
         
+        // Truncate JSON data if necessary
+        String truncatedJson = jsonData != null && jsonData.length() > maxFieldLength
+            ? jsonData.substring(0, maxFieldLength - 3) + '...'
+            : jsonData;
+        
+        // Truncate error message if necessary
+        String truncatedErrorMessage = errorMessage != null && errorMessage.length() > maxFieldLength
+            ? errorMessage.substring(0, maxFieldLength - 3) + '...'
+            : errorMessage;
+        
+        // Debugging to confirm truncation logic
+        System.debug('Truncated JSON Length: ' + (truncatedJson != null ? truncatedJson.length() : 0));
+        System.debug('Truncated Error Message Length: ' + (truncatedErrorMessage != null ? truncatedErrorMessage.length() : 0));
+        
+        // Create the log record
         Log__c log = new Log__c();
         log.Error__c = errorType + ': ' + truncatedErrorMessage;
         log.Direction__c = direction;
         log.Json__c = truncatedJson;
-        insert log;
+        system.debug('log.Error__c: '+ log.Error__c+'log.Json__c: '+ log.Json__c);
+        // Insert log and handle potential errors
+        try {
+            insert log;
+        } catch (Exception e) {
+            System.debug('Failed to insert log: ' + e.getMessage());
+        }
     }
+    
+    
+    
     
     private Map<String, Map<String, String>> getFieldMappings() {
         Map<String, Map<String, String>> fieldMappings = new Map<String, Map<String, String>>();
