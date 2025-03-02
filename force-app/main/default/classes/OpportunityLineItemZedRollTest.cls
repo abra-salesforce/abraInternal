@@ -1,6 +1,7 @@
 @isTest(seealldata=true)
 public class OpportunityLineItemZedRollTest{
-static testMethod void tes(){
+@IsTest
+static void tes(){
 update [select id from OpportunityLineItem limit 1];
 }
 }

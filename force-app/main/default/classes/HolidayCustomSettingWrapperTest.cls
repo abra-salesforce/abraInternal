@@ -1,6 +1,7 @@
 @isTest(seealldata=true)
 public class HolidayCustomSettingWrapperTest {
-    public static testMethod void tes() {
+    @IsTest
+public static void tes() {
         Date startD = System.Today().addMonths(-3);
         Date endD = startD.addMonths(6);
         HolidaysCustomSettingWrapper.getRelevantHolidaysN(startD,endD);

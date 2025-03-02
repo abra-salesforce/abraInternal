@@ -177,7 +177,8 @@ public with sharing class Milestone1_Charts_GanttController {
     	return word.replaceAll(REGEXP_QUOTES,'\\\\"');
     }
     
-    static testMethod void TestProjectJson() {
+    @IsTest
+static void TestProjectJson() {
         Milestone1_Project__c p1 = Milestone1_Test_Utility.sampleProjectActive('Json');
         insert p1;
         Milestone1_Milestone__c m1 = Milestone1_Test_Utility.sampleMilestone(p1);
@@ -214,7 +215,8 @@ public with sharing class Milestone1_Charts_GanttController {
                 
     }
     
-    static testMethod void TestMilestoneJson() {
+    @IsTest
+static void TestMilestoneJson() {
     	Milestone1_Project__c p1 = Milestone1_Test_Utility.sampleProjectActive('Json');
         insert p1;
         

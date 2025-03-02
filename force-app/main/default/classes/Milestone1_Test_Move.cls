@@ -29,7 +29,8 @@ OF THE POSSIBILITY OF SUCH DAMAGE.
 @isTest
 private class Milestone1_Test_Move {
 
-    static testMethod void testMilestoneMove() {
+    @IsTest
+static void testMilestoneMove() {
         final Integer NUMBER_OF_MILESTONES = 5;
         final Integer NUMBER_OF_TASKS = 20;
         final Integer NUMBER_OF_TIMES = 50;
@@ -92,7 +93,8 @@ private class Milestone1_Test_Move {
         }
     }
     
-    static testMethod void testMilestoneMoveDetail() {
+    @IsTest
+static void testMilestoneMoveDetail() {
         Milestone1_Test_Utility.createDefaultCustomChatterSettings(false);
         
         //create two projects
@@ -134,7 +136,8 @@ private class Milestone1_Test_Move {
     
     //RSC 2011-09-20 Added to support milestone dependency.
     //fails when the candidate milestone has a predecessor
-    static testMethod void testMilestoneMoveFailsWithPredecessorMilestoneSet1() {
+    @IsTest
+static void testMilestoneMoveFailsWithPredecessorMilestoneSet1() {
 
         Milestone1_Test_Utility.createDefaultCustomChatterSettings(false);
         
@@ -168,7 +171,8 @@ private class Milestone1_Test_Move {
     
     //RSC 2011-09-20 Added to support milestone dependency.
     //fails when the candidate milestone has successors.
-    static testMethod void testMilestoneMoveFailsWithPredecessorMilestoneSet2() {
+    @IsTest
+static void testMilestoneMoveFailsWithPredecessorMilestoneSet2() {
 
         Milestone1_Test_Utility.createDefaultCustomChatterSettings(false);
         
@@ -202,7 +206,8 @@ private class Milestone1_Test_Move {
     
     //RSC 2011-09-20 Added to support milestone dependency.
     //succeeds for simple moves
-    static testMethod void testMilestoneMoveFailsWithPredecessorMilestoneSet3() {
+    @IsTest
+static void testMilestoneMoveFailsWithPredecessorMilestoneSet3() {
 
         Milestone1_Test_Utility.createDefaultCustomChatterSettings(false);
         
@@ -234,7 +239,8 @@ private class Milestone1_Test_Move {
     
     //RSC 2011-09-20 Added to support milestone dependency.
     //succeeds for parent with no preds / successors but children with both.
-    static testMethod void testMilestoneMoveFailsWithPredecessorMilestoneSet4() {
+    @IsTest
+static void testMilestoneMoveFailsWithPredecessorMilestoneSet4() {
 
         Milestone1_Test_Utility.createDefaultCustomChatterSettings(false);
         
@@ -271,7 +277,8 @@ private class Milestone1_Test_Move {
         
     }       
     
-    static testMethod void testTaskMoveFromList() {
+    @IsTest
+static void testTaskMoveFromList() {
         
         Milestone1_Test_Utility.createDefaultCustomChatterSettings(false);
         
@@ -339,7 +346,8 @@ private class Milestone1_Test_Move {
         
     }
     
-    static testMethod void testTaskMove() {
+    @IsTest
+static void testTaskMove() {
         
         Milestone1_Test_Utility.createDefaultCustomChatterSettings(false);
         
@@ -397,7 +405,8 @@ private class Milestone1_Test_Move {
     }
  
  	//simple move, should fail since the selected task has a successor
-    static testMethod void testTaskMoveWithSuccessorsPredecessors1() {
+    @IsTest
+static void testTaskMoveWithSuccessorsPredecessors1() {
         
         Milestone1_Test_Utility.createDefaultCustomChatterSettings(false);
         
@@ -431,7 +440,8 @@ private class Milestone1_Test_Move {
     }
     
     //should success since everything is selected
-    static testMethod void testTaskMoveWithSuccessorsPredecessors2() {
+    @IsTest
+static void testTaskMoveWithSuccessorsPredecessors2() {
         
         Milestone1_Test_Utility.createDefaultCustomChatterSettings(false);
         
@@ -472,7 +482,8 @@ private class Milestone1_Test_Move {
     
 
 
-    static testMethod void testHighTaskMove(){
+    @IsTest
+static void testHighTaskMove(){
         Set<Id> srcMilestoneSet = new Set<Id>();
         Set<Id> dstMilestoneSet = new Set<Id>();
 
@@ -541,7 +552,8 @@ private class Milestone1_Test_Move {
         system.assertEquals( 2 * 2 * 55, dstTaskCount );
     }
     
-    static testmethod void testSimpleCloneAndMove() {
+    @IsTest
+static void testSimpleCloneAndMove() {
         
         Milestone1_Test_Utility.createDefaultCustomChatterSettings(false);
         

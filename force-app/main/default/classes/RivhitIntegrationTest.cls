@@ -1,6 +1,7 @@
 @isTest
 private class RivhitIntegrationTest {
-    static testMethod void testMe() {
+    @IsTest
+static void testMe() {
         insert new Account(Name='String content', Finance_Acct_num__c='2147483647');
 
         RivhitIntegration.scheduleAndExecute();

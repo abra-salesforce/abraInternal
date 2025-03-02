@@ -315,7 +315,8 @@ public with sharing class Milestone1_Summary2 {
         public String value {get; private set;}
     }
     
-    static TestMethod void testController() {
+    @IsTest
+static void testController() {
         
         //make sure it shows active projects
         Milestone1_Summary2 summary2 = new Milestone1_Summary2();

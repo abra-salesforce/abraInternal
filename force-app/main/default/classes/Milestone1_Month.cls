@@ -191,7 +191,8 @@ public with sharing class Milestone1_Month {
             
     }
 
-    static testMethod void testMe() {
+    @IsTest
+static void testMe() {
          Milestone1_Project__c testProject = Milestone1_Test_Utility.sampleProject('UNIT TEST PROJECT NAME ABC123XYZ UNIQUE' + System.now());
         testProject.Status__c = 'Active';
         testProject.Deadline__c = Date.today();

@@ -311,7 +311,8 @@ public with sharing class Milestone1_repeatCon {
   private Milestone1_Month month;
   
   
-  static testMethod void testController()
+  @IsTest
+static void testController()
   {
         Milestone1_Project__c testProject = Milestone1_Test_Utility.sampleProject('UNIT TEST PROJECT NAME ABC123XYZ UNIQUE' + System.now());
         testProject.Status__c = 'Active';
@@ -340,7 +341,8 @@ public with sharing class Milestone1_repeatCon {
         system.assertEquals(milestonesMap.containsKey(testMilestone.id),true);
   }
   
-  static testMethod void testControllerFilterTasks()
+  @IsTest
+static void testControllerFilterTasks()
   {
         Milestone1_Project__c testProject = Milestone1_Test_Utility.sampleProject('UNIT TEST PROJECT NAME ABC123XYZ UNIQUE' + System.now());
         testProject.Status__c = 'Active';
@@ -386,7 +388,8 @@ public with sharing class Milestone1_repeatCon {
         }
   }
   
-  static testMethod void testControllerFilterMilestones()
+  @IsTest
+static void testControllerFilterMilestones()
   {
         Milestone1_Project__c testProject = Milestone1_Test_Utility.sampleProject('UNIT TEST PROJECT NAME ABC123XYZ UNIQUE' + System.now());
         testProject.Status__c = 'Active';
@@ -424,7 +427,8 @@ public with sharing class Milestone1_repeatCon {
         system.assertEquals(milestonesMap.containsKey(testMilestone.id),true);
   }
   
-  static testMethod void testControllerFilterMyProjects()
+  @IsTest
+static void testControllerFilterMyProjects()
   {
         Milestone1_Project__c testProject = Milestone1_Test_Utility.sampleProject('UNIT TEST PROJECT NAME ABC123XYZ UNIQUE' + System.now());
         testProject.Status__c = 'Active';
@@ -468,7 +472,8 @@ public with sharing class Milestone1_repeatCon {
          *Comment: To add an additional project filter.
          *Bug #: 66.
    */ 
-    static testMethod void testControllerFilterAllItems()
+    @IsTest
+static void testControllerFilterAllItems()
     {
         Milestone1_Project__c testProject = Milestone1_Test_Utility.sampleProject('UNIT TEST PROJECT NAME ABC123XYZ UNIQUE' + System.now());
         testProject.Status__c = 'Active';
@@ -500,7 +505,8 @@ public with sharing class Milestone1_repeatCon {
       
     }
   
-  static testMethod void testControllerFilterAllItemsWithBlankProject()
+  @IsTest
+static void testControllerFilterAllItemsWithBlankProject()
     {
         Milestone1_Project__c testProject = Milestone1_Test_Utility.sampleProject('Trial Project ABCXYZ' + System.now());
         testProject.Status__c = 'Active';
@@ -556,7 +562,8 @@ public with sharing class Milestone1_repeatCon {
     }
 
 
-static testMethod void testControllerFilterMyProjectsWithBlankProject()
+@IsTest
+static void testControllerFilterMyProjectsWithBlankProject()
   {
          Milestone1_Project__c testProject = Milestone1_Test_Utility.sampleProject('Trial Project ABCXYZ' + System.now());
         testProject.Status__c = 'Active';
@@ -598,7 +605,8 @@ static testMethod void testControllerFilterMyProjectsWithBlankProject()
         system.assertEquals(testTask.id,task.id);
   }
   
-  static testMethod void testControllerFilterMilestonesWithBlankProject()
+  @IsTest
+static void testControllerFilterMilestonesWithBlankProject()
   {
         Milestone1_Project__c testProject = Milestone1_Test_Utility.sampleProject('Trial Project ABCXYZ' + System.now());
         testProject.Status__c = 'Active';
@@ -639,7 +647,8 @@ static testMethod void testControllerFilterMyProjectsWithBlankProject()
         
   }
   
-  static testMethod void testControllerFilterTasksWithBlankProject()
+  @IsTest
+static void testControllerFilterTasksWithBlankProject()
   {
         Milestone1_Project__c testProject = Milestone1_Test_Utility.sampleProject('Trial Project ABCXYZ' + System.now());
         testProject.Status__c = 'Active';

@@ -1,6 +1,7 @@
 @isTest
 private class Milestone1_Schema_Helper_Tst {
-	static testmethod void getGlobalDescribe(){
+	@IsTest
+static void getGlobalDescribe(){
 		Map<String, Schema.SObjectType> describeResults;
 		//Test the caching - the std library method can only be called 10 times
 		for(integer i = 0; i < 15; i++){
@@ -12,7 +13,8 @@ private class Milestone1_Schema_Helper_Tst {
 		
 	}
 	
-	static testmethod void isOrgChatterEnabled(){
+	@IsTest
+static void isOrgChatterEnabled(){
 		System.assertNotEquals(null, Milestone1_Schema_Helper.isOrgChatterEnabled(),'Unable to determine if chatter is enabled in this org.');
 	}
 }

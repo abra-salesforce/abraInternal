@@ -29,7 +29,8 @@ OF THE POSSIBILITY OF SUCH DAMAGE.
 @isTest
 private class Milestone1_Time_Trigger_Tst  
 {
-    static testMethod void testTimeTrigger()
+    @IsTest
+static void testTimeTrigger()
     {
         Milestone1_Project__c proj = Milestone1_Test_Utility.sampleProject('proj');
         insert proj;

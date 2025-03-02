@@ -47,7 +47,8 @@ global with sharing class Milestone1_Project_Batch_Update implements Database.Ba
 	global void finish(Database.BatchableContext BC){}
 	
 	
-	public static testmethod void testMilestoneBatchUpdate(){
+	@IsTest
+public static void testMilestoneBatchUpdate(){
 		// Create projects
 		List<Milestone1_Project__c> pList = new List<Milestone1_Project__c>();
 		

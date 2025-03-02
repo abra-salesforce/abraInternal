@@ -1,6 +1,7 @@
 @isTest(seealldata=true)
 public class WorkerAssistantTest {
-    static testMethod void tes() {
+    @IsTest
+static void tes() {
         update new User(id=Userinfo.getUserId(),Worker_Assistant__c='Assigner');
         WorkerAssistantController.getInit(Userinfo.getUserId());
         String isid = [select id from Issue__c where Assigned_To__c!=:Userinfo.getUserId() and Scope_item__c!=null and Login_Details_1__c!=null and Deploy_Login_Details__c!=null limit 1].id;

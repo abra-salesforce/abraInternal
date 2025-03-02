@@ -29,7 +29,8 @@ OF THE POSSIBILITY OF SUCH DAMAGE.
 @isTest
 private class Milestone1_Test_Field_Values {
 
-    static testMethod void testFieldValues() {
+    @IsTest
+static void testFieldValues() {
         final Integer NUMBER_OF_MILESTONES = 5;
         final Integer NUMBER_OF_TASKS = 20;
         final Integer NUMBER_OF_TIMES = 50;

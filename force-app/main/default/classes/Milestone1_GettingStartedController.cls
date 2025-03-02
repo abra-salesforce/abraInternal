@@ -290,7 +290,8 @@ public with sharing class Milestone1_GettingStartedController {
         
     }
     
-    static testMethod void testGetSettings() {
+    @IsTest
+static void testGetSettings() {
         
         Milestone1_GettingStartedController cont = new Milestone1_GettingStartedController();
         
@@ -314,7 +315,8 @@ public with sharing class Milestone1_GettingStartedController {
     }
     
 
-    static testMethod void testGettingStartedProject() {
+    @IsTest
+static void testGettingStartedProject() {
         
         Test.startTest();
         

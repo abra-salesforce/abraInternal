@@ -29,7 +29,8 @@ OF THE POSSIBILITY OF SUCH DAMAGE.
 @isTest
 private class Milestone1_XML_Export_Utility_Test {
     
-        static TestMethod void testSOQLQueries()
+        @IsTest
+static void testSOQLQueries()
     {
         Milestone1_XML_Export_Utility m1exportutility = new Milestone1_XML_Export_Utility();
         Milestone1_Project__c testProject = Milestone1_Test_Utility.sampleProject('UNIT_TEST_PROJECT_NAME_ABC123XYZ_UNIQUE' + System.now());

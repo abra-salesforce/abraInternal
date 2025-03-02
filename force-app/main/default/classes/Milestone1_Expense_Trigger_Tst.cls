@@ -29,7 +29,8 @@ OF THE POSSIBILITY OF SUCH DAMAGE.
 @isTest
 private class Milestone1_Expense_Trigger_Tst 
 {
-    static testMethod void testExpenseTrigger()
+    @IsTest
+static void testExpenseTrigger()
     {
         Milestone1_Project__c proj = Milestone1_Test_Utility.sampleProject('proj');
         insert proj;

@@ -191,7 +191,8 @@ public with sharing class Milestone1_Project_Trigger_Utility {
     /**
 	* Test milestone delete
 	*/
-	public static testmethod void testMilestoneDelete(){
+	@IsTest
+public static void testMilestoneDelete(){
 		// Create project
 		Milestone1_Project__c project = Milestone1_Test_Utility.sampleProject('My Test Project');
 		

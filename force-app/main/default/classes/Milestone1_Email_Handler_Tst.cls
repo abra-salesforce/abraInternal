@@ -29,7 +29,8 @@ OF THE POSSIBILITY OF SUCH DAMAGE.
 @isTest
 private class Milestone1_Email_Handler_Tst {
     //Test 1 Task created for valid email without attachments
-    static testMethod void testEmailWithoutAttachments()
+    @IsTest
+static void testEmailWithoutAttachments()
     {
         
         Milestone1_Project__c proj = Milestone1_Test_Utility.sampleProject('proj');
@@ -62,7 +63,8 @@ private class Milestone1_Email_Handler_Tst {
     
     
     //Test 1 Task created for valid email with 2 attachments, 1 Text and 1 Binary
-    static testMethod void testEmailWithAttachments()
+    @IsTest
+static void testEmailWithAttachments()
     {
         
         Milestone1_Project__c proj = Milestone1_Test_Utility.sampleProject('proj');
@@ -111,7 +113,8 @@ private class Milestone1_Email_Handler_Tst {
     }
     
     
-    static testMethod void testEmailNoUsersFound()
+    @IsTest
+static void testEmailNoUsersFound()
     {
         
         Milestone1_Project__c proj = Milestone1_Test_Utility.sampleProject('proj');
@@ -137,7 +140,8 @@ private class Milestone1_Email_Handler_Tst {
         system.assert(!testResult.success);
     }
     
-    static testMethod void testNoSubject()
+    @IsTest
+static void testNoSubject()
     {
         
         Milestone1_Project__c proj = Milestone1_Test_Utility.sampleProject('proj');
@@ -166,7 +170,8 @@ private class Milestone1_Email_Handler_Tst {
         system.assert(testResult.message == Milestone1_Email_Handler.ERROR_SUBJECT_MISSING);
     }
     
-    static testMethod void testEmailAliasNotFound()
+    @IsTest
+static void testEmailAliasNotFound()
     {
         Milestone1_Project__c proj = Milestone1_Test_Utility.sampleProject('proj');
         insert proj;
@@ -196,7 +201,8 @@ private class Milestone1_Email_Handler_Tst {
         system.assert(testResult.message == Milestone1_Email_Handler.ERROR_ALIAS_NOT_FOUND);
     }
     
-    static testMethod void testReplyEmailWithoutAttachmentsCreateNote()
+    @IsTest
+static void testReplyEmailWithoutAttachmentsCreateNote()
     {
         String taskName = 'Unit Test Email Notes 123';
         Milestone1_Project__c proj = Milestone1_Test_Utility.sampleProject('proj');
@@ -232,7 +238,8 @@ private class Milestone1_Email_Handler_Tst {
         system.assert(testResult.success);
     }
 
-    static testMethod void testReplyEmailWithoutAttachmentsCreateNoteFail()
+    @IsTest
+static void testReplyEmailWithoutAttachmentsCreateNoteFail()
     {
         String taskName = 'Unit Test Email Notes 123';
         Milestone1_Project__c proj = Milestone1_Test_Utility.sampleProject('proj');
@@ -267,7 +274,8 @@ private class Milestone1_Email_Handler_Tst {
         system.assert(testResult.success);
     }
     
-    static testMethod void testNoAliasWithDefaultMilestoneAlias()
+    @IsTest
+static void testNoAliasWithDefaultMilestoneAlias()
     {
         String taskName = 'UNIT TEST EMAIL';
         String taskDescription = 'Unit Test Body: ' + Date.today();
@@ -310,7 +318,8 @@ private class Milestone1_Email_Handler_Tst {
         system.assert(createdTasks.get(0).Assigned_To__c == users.get(0).Id);
     }
     
-    static testMethod void testForward()
+    @IsTest
+static void testForward()
     {
         String taskName = 'UNIT TEST EMAIL';
         String milestoneAlias = 'unit_test';
@@ -343,7 +352,8 @@ private class Milestone1_Email_Handler_Tst {
         system.assert(createdTasks.size()>0);
     }
     
-    static testMethod void testEmailNoTask()
+    @IsTest
+static void testEmailNoTask()
     {
         String milestoneAlias = 'unit_test';
         String taskDescription = 'Unit Test Body: ' + Date.today();

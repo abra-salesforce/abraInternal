@@ -48,7 +48,8 @@ global with sharing class Milestone1_Milestone_Batch_Update implements Database.
 	global void finish(Database.BatchableContext BC){}
 	
 	
-	public static testmethod void testMilestoneBatchUpdate(){
+	@IsTest
+public static void testMilestoneBatchUpdate(){
 		// Create a project with milestones
 		Milestone1_Project__c         project = Milestone1_Test_Utility.sampleProject('My Project');
 		List<Milestone1_Milestone__c> mList   = new List<Milestone1_Milestone__c>();

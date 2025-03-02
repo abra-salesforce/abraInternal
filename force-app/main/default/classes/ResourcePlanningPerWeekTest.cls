@@ -1,7 +1,8 @@
 @isTest (seealldata=true)
 public with sharing class ResourcePlanningPerWeekTest {
 
-    public static testMethod void attachResourceToMonthly(){
+    @IsTest
+public static void attachResourceToMonthly(){
     
         String conId = [select id from Contact where name='Edan Badani' limit 1].id;
         Date startOfOct = date.newInstance(2021, 10, 01);

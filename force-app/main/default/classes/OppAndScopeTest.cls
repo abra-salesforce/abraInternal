@@ -1,6 +1,7 @@
 @isTest(seealldata=true)
 public class OppAndScopeTest {
-    public static testMethod void tes() {
+    @IsTest
+public static void tes() {
         Opportunity opp = [select id,CreatedDate,Accountid from Opportunity where StageName!='Closed Won' and accountid!=null and Ownerid=:Userinfo.getUserId() Order by CreatedDate desc limit 1];
         Scope_Template__c st = new Scope_Template__c(Category__c='Sales',Name='test',Scope_Info__c='test',Default_PM_Budget__c=120,Default_Implementation_Budget__c=120,Default_Dev_Budget__c=120,Default_QA_Budget__c=120);
         insert st;
@@ -21,7 +22,8 @@ public class OppAndScopeTest {
         }catch(exception e){}
         test.stopTest();
     }
-    public static testMethod void testUtilTests() {
+    @IsTest
+public static void testUtilTests() {
         String recTypeIdSalesforce = [select id from RecordType Where SobjectType='Working_Hours__c' and Name='Salesforce' limit 1].id;
         String conId = [select id from Contact where name='Edan Badani' limit 1].id;
         Opportunity opp = [select id,CreatedDate,Accountid from Opportunity where StageName!='Closed Won' and accountid!=null Order by CreatedDate desc limit 1];
@@ -39,7 +41,7 @@ public class OppAndScopeTest {
         new MonthlyController().execute(null);
         upsert new Monthly_Teken__c(Date__c=Date.newInstance(2025, 01, 01),Teken__c=180, Key__c=String.valueOf(Date.newInstance(2025, 01, 01))) Key__c;
         Test.startTest();
-		Monthly_Hours__c m = MonthlyController.createMonthly(conId, Date.newInstance(2025, 01, 01), null);
+    Monthly_Hours__c m = MonthlyController.createMonthly(conId, Date.newInstance(2025, 01, 01), null);
         upsert m Key__c;
         update m;
         insert new Holiday__c(Date__c=Date.newInstance(2025, 11, 11), Half_Day__c=false, Muslim_Holiday__c=false);

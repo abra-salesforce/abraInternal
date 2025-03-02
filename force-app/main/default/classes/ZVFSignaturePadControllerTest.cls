@@ -1,6 +1,7 @@
 @isTest
 private class ZVFSignaturePadControllerTest {
-    static testMethod void runPositiveTestCases(){
+    @IsTest
+    static void runPositiveTestCases(){
         
         Opportunity o = new Opportunity();
         o.name = 'test';

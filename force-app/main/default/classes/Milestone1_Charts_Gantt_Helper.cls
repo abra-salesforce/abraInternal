@@ -38,7 +38,8 @@ public with sharing class Milestone1_Charts_Gantt_Helper {
 		allowView = Apexpages.currentPage().getParameters().get('p') == null;
 	}
 
-	static testMethod void testController() {
+	@IsTest
+static void testController() {
 		
 		Milestone1_Project__c proj = Milestone1_Test_Utility.sampleProject('Basic Sample For Test' + DateTime.now().getTime());
 		insert proj;

@@ -7,7 +7,8 @@
 **/
 @IsTest(SeeAllData=true)
 public class ResourcePlanningPerWeekEmployeeTest {
-    public static testmethod void test() {
+    @IsTest
+public static void test() {
         Resource_Planning_Per_Week__c resource = [SELECT Id, Working_Team_Resource__c FROM Resource_Planning_Per_Week__c LIMIT 1];
         update resource;
     }

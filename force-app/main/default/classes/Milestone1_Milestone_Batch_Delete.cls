@@ -62,7 +62,8 @@ global with sharing class Milestone1_Milestone_Batch_Delete implements Database.
 	global void finish(Database.BatchableContext BC){}
 	
 	
-	public static testmethod void testMilestoneBatchDelete(){
+	@IsTest
+public static void testMilestoneBatchDelete(){
 		// Create a project with milestones
 		Milestone1_Project__c         project = Milestone1_Test_Utility.sampleProject('My Test Project'); 
 		List<Milestone1_Milestone__c> mList   = new List<Milestone1_Milestone__c>();

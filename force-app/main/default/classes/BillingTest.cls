@@ -1,6 +1,7 @@
 @isTest(seealldata=true)
 public class BillingTest {
-	static TestMethod void Billing() {
+	@IsTest
+static void Billing() {
 		BillingController bc = new BillingController();
 		bc.curDep = 'Salesforce';
 		bc.departmentChange();

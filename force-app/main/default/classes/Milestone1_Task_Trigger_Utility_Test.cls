@@ -36,7 +36,8 @@ private class Milestone1_Task_Trigger_Utility_Test {
 	/**
 	* Test exceeded chatter suscription
 	*/
-    static testMethod void chatterSubscriptionLimitExceeded() {
+    @IsTest
+static void chatterSubscriptionLimitExceeded() {
 		// Create a poject
 		Milestone1_Project__c proj = Milestone1_Test_Utility.sampleProject('Chatter Blow');
 		insert proj;

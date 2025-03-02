@@ -8,7 +8,8 @@
 
 @isTest
 public without sharing class LicenseServiceTest {
-    static testMethod void tes() {
+    @IsTest
+static void tes() {
         LicenseService.checkLic('{"product":"test","orgId":"testclass"}');
     }
 }

@@ -4,7 +4,8 @@
 @isTest
 private class Milestone1_Test_Task_Dependency {
     
-    static testMethod void testMilestoneWithManyTasksManySubMilestonesDependency() {
+    @IsTest
+static void testMilestoneWithManyTasksManySubMilestonesDependency() {
         final Integer NUMBER_OF_MILESTONES = 200;
         final Integer NUMBER_OF_TASKS = 200;
         final Integer NUMBER_OF_DAYS_SHIFTED = -10;

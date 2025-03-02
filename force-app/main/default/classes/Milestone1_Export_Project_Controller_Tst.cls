@@ -29,7 +29,8 @@ OF THE POSSIBILITY OF SUCH DAMAGE.
 @isTest
 private class Milestone1_Export_Project_Controller_Tst {
 
-    static testMethod void testImportController() {
+    @IsTest
+static void testImportController() {
         Milestone1_XML_Export_Utility m1exportutility = new Milestone1_XML_Export_Utility();
         Milestone1_Project__c testProject = Milestone1_Test_Utility.sampleProject('UNIT TEST PROJECT NAME CONTROLLER UNIQUE' + System.now());
         insert testProject;
@@ -65,7 +66,8 @@ private class Milestone1_Export_Project_Controller_Tst {
         System.assert(projRef != null);
     }
     
-    static testmethod void testExportFileTooLong(){
+    @IsTest
+static void testExportFileTooLong(){
 		// Set new size for project import
     	Integer old_max_file_size = Milestone1_Import_Project_Controller.MAX_FILE_SIZE;
     	Milestone1_Import_Project_Controller.MAX_FILE_SIZE = 1000;

@@ -1,6 +1,7 @@
 @isTest(seealldata=true)
 public class AttachOrderDocsToAccountTest {
-    static testMethod void tes(){
+    @IsTest
+static void tes(){
         ContentVersion contentVersion = new ContentVersion(
             Title          = 'a picture',
             PathOnClient   = 'Pic.jpg',

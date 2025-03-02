@@ -29,7 +29,8 @@ OF THE POSSIBILITY OF SUCH DAMAGE.
 @isTest
 private class Milestone1_Test_Import_Export {
 
-    static testMethod void testProjectManyMilestonesManyTasksImportExport() {
+    @IsTest
+static void testProjectManyMilestonesManyTasksImportExport() {
          final Integer NUMBER_OF_MILESTONES = 50;
         final Integer NUMBER_OF_TASKS = 5;
         final Integer NUMBER_OF_SUCCESSOR_MILESTONES = 5;

@@ -43,7 +43,8 @@ public with sharing class Milestone1_Expense_Trigger_Utility
         }
     }
     
-    static testMethod void testTriggerUtility()
+    @IsTest
+static void testTriggerUtility()
     {
         List<Milestone1_Expense__c> recs = new List<Milestone1_Expense__c>{new Milestone1_Expense__c()};
         Milestone1_Expense_Trigger_Utility.handleExpenseBeforeTrigger(recs);

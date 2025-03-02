@@ -29,7 +29,8 @@ OF THE POSSIBILITY OF SUCH DAMAGE.
 @isTest
 private class Milestone1_Email_Utility_Tst 
 {
-    static testMethod void testEmailUtilityBody()
+    @IsTest
+static void testEmailUtilityBody()
     {
         Milestone1_Project__c proj = Milestone1_Test_Utility.sampleProject('proj');
         insert proj;

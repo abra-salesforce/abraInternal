@@ -529,7 +529,8 @@ public with sharing class Milestone1_Milestone_Trigger_Utility {
 	/**
 	* Test batch update of milestones with parent milestones
 	*/
-	public static testmethod void testMilestoneBatchUpdate(){
+	@IsTest
+public static void testMilestoneBatchUpdate(){
 		// Create project
 		Milestone1_Project__c project = Milestone1_Test_Utility.sampleProject('My Project');
 		

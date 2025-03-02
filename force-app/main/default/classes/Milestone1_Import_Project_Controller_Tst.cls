@@ -29,7 +29,8 @@ OF THE POSSIBILITY OF SUCH DAMAGE.
 @isTest
 private class Milestone1_Import_Project_Controller_Tst {
     
-    static testMethod void testImportController() {
+    @IsTest
+static void testImportController() {
         
         Document testDoc = new Document();
         testDoc.Name = 'EXPORT UNIT TEST XYZABC' + System.now();
@@ -51,7 +52,8 @@ private class Milestone1_Import_Project_Controller_Tst {
         
     }
     
-    static testMethod void testImportControllerNoFileException() {
+    @IsTest
+static void testImportControllerNoFileException() {
         
         //List<Document> docs = [Select Id from Document];
         //delete docs;
@@ -72,7 +74,8 @@ private class Milestone1_Import_Project_Controller_Tst {
         }   
     }
     
-    static testMethod void testImportControllerInvalidXML() {
+    @IsTest
+static void testImportControllerInvalidXML() {
         
         Document testDoc = new Document();
         testDoc.Name = 'EXPORT UNIT TEST XYZABC' + System.now();
@@ -93,7 +96,8 @@ private class Milestone1_Import_Project_Controller_Tst {
         System.assert(testController.project == null);
     }
     
-    static testMethod void testImportControllerValidFromDocsFolder() {
+    @IsTest
+static void testImportControllerValidFromDocsFolder() {
         
         Document testDoc = new Document();
         testDoc.Name = 'EXPORT UNIT TEST XYZABC' + System.now();

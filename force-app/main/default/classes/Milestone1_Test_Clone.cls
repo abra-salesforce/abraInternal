@@ -29,7 +29,8 @@ OF THE POSSIBILITY OF SUCH DAMAGE.
 @isTest
 private class Milestone1_Test_Clone { 
                   
-    static testMethod void testProjectManyMilestonesManyTasksClone() {
+    @IsTest
+static void testProjectManyMilestonesManyTasksClone() {
         final Integer NUMBER_OF_MILESTONES = 200;
         final Integer NUMBER_OF_TASKS = 200;
         
@@ -107,7 +108,8 @@ private class Milestone1_Test_Clone {
         areEqualsTasks(tasks2,tasks);
     }
  
-    static testMethod void testProjectManyTasksClone() {
+    @IsTest
+static void testProjectManyTasksClone() {
         final Integer NUMBER_OF_TASKS = 200;
         
         Milestone1_Test_Utility.createDefaultCustomChatterSettings(false);
@@ -157,7 +159,8 @@ private class Milestone1_Test_Clone {
         areEqualsTasks(tasks2,tasks);
     }
     
-     static testMethod void testMilestoneWithManyTasksManySubMilestonesClone() {
+     @IsTest
+static void testMilestoneWithManyTasksManySubMilestonesClone() {
         final Integer NUMBER_OF_MILESTONES = 200;
         final Integer NUMBER_OF_TASKS = 200;
         
@@ -229,7 +232,8 @@ private class Milestone1_Test_Clone {
     }
 
 
-    static testMethod void testMilestoneWithManyTasksClone(){
+    @IsTest
+static void testMilestoneWithManyTasksClone(){
         final Integer NUMBER_OF_TASKS = 200;
         
         Milestone1_Test_Utility.createDefaultCustomChatterSettings(false);
@@ -277,7 +281,8 @@ private class Milestone1_Test_Clone {
     
     
     
-    static testmethod void testProjectCloneInactiveOwner() {        
+    @IsTest
+static void testProjectCloneInactiveOwner() {        
         
          User u = Milestone1_Test_Utility.createSFUser();
          u.IsActive = true;
@@ -311,7 +316,8 @@ private class Milestone1_Test_Clone {
             }
     }
     
-    static testmethod void testProjectCloneActiveOwner() {      
+    @IsTest
+static void testProjectCloneActiveOwner() {      
         
          User u = Milestone1_Test_Utility.createSFUser();
          u.IsActive = true;
@@ -338,7 +344,8 @@ private class Milestone1_Test_Clone {
             }
     }
     
-   static testmethod void testMilestoneCloneInactiveOwner() {
+   @IsTest
+static void testMilestoneCloneInactiveOwner() {
         
         User u = Milestone1_Test_Utility.createSFUser();
         u.IsActive = true;
@@ -384,7 +391,8 @@ private class Milestone1_Test_Clone {
    }
 
     
-    static testmethod void testMilestoneCloneActiveOwner() {        
+    @IsTest
+static void testMilestoneCloneActiveOwner() {        
         
         User u = Milestone1_Test_Utility.createSFUser();
         u.IsActive = true;
