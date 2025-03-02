@@ -28,42 +28,41 @@
     @isTest
     public with sharing class Milestone1_Time_Trigger_Utility {
         
-        //     public static void handleTimeBeforeTrigger(List<Milestone1_Time__c> recs) {
-            //         for (Milestone1_Time__c rec : recs) {
-                //             if (rec.Incurred_By__c == null) {
-                    //                 rec.Incurred_By__c = UserInfo.getUserId();
-                //             }
-                //             if (rec.Date__c == null) {
-                    //                 rec.Date__c = Date.today();
-                //             }
-            //         }
-        //     }
-    // }
-    
-    @IsTest
-    public class Milestone1_Time_Trigger_UtilityTest {
-        
-        @IsTest
-        static void testTriggerUtility() {
-            // נתחיל את הבדיקה
-            Test.startTest();
-            
-            // יצירת רשומה לבדיקה
-            Milestone1_Time__c rec = new Milestone1_Time__c();
-            insert rec;
-            
-            // הפעלת הפונקציה
-            List<Milestone1_Time__c> recs = [SELECT Id, Incurred_By__c, Date__c FROM Milestone1_Time__c WHERE Id = :rec.Id];
-            Milestone1_Time_Trigger_Utility.handleTimeBeforeTrigger(recs);
-            
-            // בדיקות אימות
-            for (Milestone1_Time__c r : recs) {
-                System.assertNotEquals(null, r.Incurred_By__c, 'Incurred_By__c should be set');
-                System.assertEquals(Date.today(), r.Date__c, 'Date__c should be today');
+            public static void handleTimeBeforeTrigger(List<Milestone1_Time__c> recs) {
+                    for (Milestone1_Time__c rec : recs) {
+                            if (rec.Incurred_By__c == null) {
+                                    rec.Incurred_By__c = UserInfo.getUserId();
+                            }
+                            if (rec.Date__c == null) {
+                                    rec.Date__c = Date.today();
+                            }
+                    }
             }
-            
-            // סיום הבדיקה
-            Test.stopTest();
-        }
     }
-}
+    
+//     @IsTest
+//     public class Milestone1_Time_Trigger_UtilityTest {
+        
+//         @IsTest
+//         static void testTriggerUtility() {
+//             // נתחיל את הבדיקה
+//             Test.startTest();
+            
+//             // יצירת רשומה לבדיקה
+//             Milestone1_Time__c rec = new Milestone1_Time__c();
+//             insert rec;
+            
+//             // הפעלת הפונקציה
+//             List<Milestone1_Time__c> recs = [SELECT Id, Incurred_By__c, Date__c FROM Milestone1_Time__c WHERE Id = :rec.Id];
+//             Milestone1_Time_Trigger_Utility.handleTimeBeforeTrigger(recs);
+            
+//             // בדיקות אימות
+//             for (Milestone1_Time__c r : recs) {
+//                 System.assertNotEquals(null, r.Incurred_By__c, 'Incurred_By__c should be set');
+//                 System.assertEquals(Date.today(), r.Date__c, 'Date__c should be today');
+//             }
+            
+//             // סיום הבדיקה
+//             Test.stopTest();
+//         }
+//     }
