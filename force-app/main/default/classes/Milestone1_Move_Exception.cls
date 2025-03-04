@@ -34,11 +34,6 @@ public with sharing class Milestone1_Move_Exception extends Exception{
     public static final String ERROR_MILESTONE_HAS_SUCCESSORS = system.label.Milestone1_TopLevelMilestoneHasSuccessors;
     public static final String ERROR_MILESTONE_HAS_PREDECESSOR = system.label.Milestone1_TopLevelMilestoneHasPredecessor;
     
-    @IsTest
-static void testConstants() 
-    {
-        //Just a place holder test method for static constants on this exception class.
-        system.assert(true);
-    }
+
 
 }
