@@ -21,11 +21,11 @@ public with sharing class Milestone1_MonthTest {
         
         Milestone1_Month m = new Milestone1_Month( Date.today());
         system.assert(m!=null);
-        List<Milestone1_Month.Week> l = m.getWeeks();
-        for(Milestone1_Month.Week w : l)
+        List<Week> l = m.getWeeks();
+        for(Week w : l)
         {
-            List<Milestone1_Month.Day> days = w.getDays();
-            for(Milestone1_Month.Day d : days)
+            List<Day> days = w.getDays();
+            for(Day d : days)
             {
                 system.debug(d.getDayOfYear());
                 system.debug(d.getDayOfMonth());
