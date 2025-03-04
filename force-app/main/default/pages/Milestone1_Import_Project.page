@@ -23,8 +23,8 @@ BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
 DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF 
 LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE 
 OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED 
-OF THE POSSIBILITY OF SUCH DAMAGE.
--->
+OF THE POSSIBILITY OF SUCH DAMAGE. -->
+
 <apex:page standardController="Milestone1_Project__c" 
             recordSetVar="projects" extensions="Milestone1_Import_Project_Controller"  
             tabStyle="Milestone1_Import_Project_Template__tab">
@@ -37,22 +37,28 @@ OF THE POSSIBILITY OF SUCH DAMAGE.
 </head>
 <div class="milestone-pm">
     <style>
-    .xmlImportError { color: red; font-weight: strong;}
+    .xmlImportError { color: red; font-weight: bold;} 
     </style>
     <apex:pageBlock title="{!$Label.Milestone1_ProjectXMLImport}">
         <apex:messages styleClass="xmlImportError" />
         <apex:form >
-        <apex:pageBlockSection title="{!$Label.Milestone1_ImportLocalTemplateXML}" collapsible="false">
-            <apex:inputFile style="width:100%" fileSize="{!maxFileSize}" id="fileToUpload" value="{!fileBody}" 
-                contentType="{!contentType}" filename="{!fileName}" />
-            <apex:commandButton action="{!importTemplateXML}" value="{!$Label.Milestone1_Import}"></apex:commandButton>
-        </apex:pageBlockSection> 
-        <apex:pageBlockSection title="{!$Label.Milestone1_ImportTemplateXML}" rendered="{!IF(docsSize > 0, "true", "false")}" collapsible="false">
-            <apex:selectRadio value="{!docId}" layout="pageDirection"><apex:selectOptions value="{!docOptions}"/></apex:selectRadio>
-            <apex:commandButton action="{!importTemplateXML}" value="{!$Label.Milestone1_Import}"></apex:commandButton>
-            </apex:pageBlockSection>
+        
+            <apex:pageBlockSection title="{!$Label.Milestone1_ImportLocalTemplateXML}" collapsible="false">
+                <apex:inputFile style="width:100%" fileSize="{!maxFileSize}" id="fileToUpload" value="{!fileBody}" 
+                    contentType="{!contentType}" filename="{!fileName}" />
+                <apex:commandButton action="{!importTemplateXML}" value="{!$Label.Milestone1_Import}"/>
+            </apex:pageBlockSection> 
+            
+            <apex:pageBlockSection title="{!$Label.Milestone1_ImportTemplateXML}" 
+                                   rendered="{!IF(docsSize > 0, true, false)}" collapsible="false">
+                <apex:selectRadio value="{!docId}" layout="pageDirection">
+                    <apex:selectOptions value="{!docOptions}"/>
+                </apex:selectRadio>
+                <apex:commandButton action="{!importTemplateXML}" value="{!$Label.Milestone1_Import}"/>
+            </apex:pageBlockSection> 
+
         </apex:form>
-     </apex:pageBlock>
+    </apex:pageBlock>
 </div>
 </html>
 </apex:page>
